@@ -1,0 +1,7 @@
+# modules
+package-lock.json
+node_modules/
+
+# debug
+debug.log
+*.log
