@@ -9,7 +9,7 @@ export interface IData {
 
 export interface ICard {
   num: number
-  expiryDate: number
-  cvc: number
+  expiryDate: string
+  cvc: string
   name: string
 }
