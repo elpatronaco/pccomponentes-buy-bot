@@ -1,7 +1,8 @@
 import chromedriver from 'chromedriver'
 import { ICard, IData } from './models'
-import webdriver, { WebDriver, Builder, By, Key } from 'selenium-webdriver'
+import webdriver, { WebDriver, Builder, By, Key, Actions } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
+import fetch from 'node-fetch'
 
 chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build())
 
@@ -12,14 +13,16 @@ export default class Bot {
   maxPrice: number
   card?: ICard
   refreshRate: number
+  phone?: string
 
-  constructor({ email, password, link, maxPrice, card, refreshRate }: IData) {
+  constructor({ email, password, link, maxPrice, card, refreshRate, phone }: IData) {
     ;(this.email = email),
       (this.password = password),
       (this.link = link),
       (this.maxPrice = maxPrice),
       (this.card = card),
-      (this.refreshRate = refreshRate)
+      (this.refreshRate = refreshRate),
+      (this.phone = phone)
   }
 
   async run() {
@@ -68,7 +71,7 @@ export default class Bot {
             .catch(() => driver.navigate().to(this.link))
           await driver
             .findElement(By.id('notify-me'))
-            .then(() => console.log('Product is not yet in stock'))
+            .then(() => console.log(`Product is not yet in stock (${new Date().toUTCString()})`))
             .catch(async () => {
               await driver
                 .findElement(By.id('precio-main'))
@@ -78,6 +81,7 @@ export default class Bot {
               if (price && price <= this.maxPrice) {
                 stock = true
                 console.log(`PRODUCT IN STOCK! Starting buy process`)
+                await this.sendSms('IN STOCK! ATTEMPTING TO BUY')
               } else {
                 console.log(
                   `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${
@@ -103,9 +107,10 @@ export default class Bot {
       .findElement(By.xpath(`//*[@id="btnsWishAddBuy"]/button[3]`))
       .then(value => value.click())
       .catch(() => console.log("Couldn't find any buy button"))
-    await this.sleep(3000)
+    await this.sleep(2000)
     await driver.findElement(By.id('GTM-carrito-realizarPedidoPaso1')).then(value => value.click())
-    await this.sleep(3000)
+    await this.sleep(2000)
+    // checks if the account has an added card, if not it adds he provided
     await driver.findElements(By.className('h5 card-name')).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
         this.addCard !== undefined
@@ -113,43 +118,80 @@ export default class Bot {
           : console.error("Error: You have no card on you account and you didn't provide any")
     })
     await driver
-      .findElement(By.id('pccom-conditions'))
-      .then(value => value.click())
-      .catch(() => console.error("Didn't find the accept conditions button"))
+      .findElements(By.className('c-indicator margin-top-0'))
+      .then(value => value[0].click())
+      .catch(reason => console.error(reason))
     await this.sleep(500)
     await driver
       .findElement(By.id('GTM-carrito-finalizarCompra'))
       .then(value => value.click())
       .catch(() => console.error("Couldn't click the buy button. FUUUUUCK"))
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
+    await this.sendSms('DONE. CHECK YOUR ORDERS!')
   }
 
   async addCard(driver: WebDriver) {
-    // const scroll = document.scrollingElement || document.body
-    // scroll.scrollTop = scroll.scrollHeight - 300
     await this.sleep(200)
     // clicking add card button
     await driver
       .findElement(By.id('addNewCard'))
       .then(value => value.click())
       .catch(() => console.error("Didn't find the add card button"))
-    await this.sleep(500)
+    await this.sleep(2000)
+    const iFrames = await driver.findElements(By.className('js-iframe'))
+    /* let values: Array<Array<[ By, number | string]>> = [
+      [By.id('encryptedCardNumber'), this.card?.num!]
+    ] */
+    /* Card values are secured in 3 different IFrames, 
+    we'll switch to each one and introduce the values */
+    await driver.switchTo().frame(iFrames[0])
     await driver
       .findElement(By.id('encryptedCardNumber'))
-      .then(value => value.sendKeys(this.card?.num!))
+      .then(value => value.sendKeys(parseInt(this.card?.num!, 10)))
+    await driver.switchTo().defaultContent()
+    //
+    await driver.switchTo().frame(iFrames[1])
     await driver
       .findElement(By.id('encryptedExpiryDate'))
-      .then(value => value.sendKeys(parseInt(this.card?.expiryDate!)))
+      .then(value => value.sendKeys(parseInt(this.card?.expiryDate!, 10)))
+    await driver.switchTo().defaultContent()
+    //
+    await driver.switchTo().frame(iFrames[2])
+    await driver
+      .findElement(By.id('encryptedSecurityCode'))
+      .then(value => value.sendKeys(parseInt(this.card?.cvc!, 10)))
+    await driver.switchTo().defaultContent()
+    //
     await driver
       .findElements(By.className('adyen-checkout__card__holderName__input'))
-      .then(value => value[0].sendKeys(parseInt(this.card?.name!)))
-    await this.sleep(200)
-    await driver
-      .findElements(By.className('adyen-checkout__button'))
-      .then(value => value[0].click())
-    await this.sleep(200)
-    // scroll.scrollTop = 0
+      .then(value => value[0].sendKeys(this.card?.name!))
     await this.sleep(500)
+    //
+    await driver
+      .findElements(By.className('adyen-checkout__button adyen-checkout__button--pay'))
+      .then(value => value[0].click())
+    await this.sleep(500)
+  }
+
+  async sendSms(msg: string) {
+    if (this.phone !== undefined)
+      try {
+        await fetch('https://rest-api.d7networks.com/secure/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: 'Basic aWlheTMyMjI6elIyNDVRVGY='
+          },
+          body: JSON.stringify({
+            // @ts-ignore
+            content: msg,
+            from: 'PCCOM-BOT',
+            to: this.phone!
+          })
+        }).then(() => console.log(`SMS sent successfully: ${msg}`))
+      } catch (err) {
+        console.error(`Couldn't send SMS: ${err}`)
+      }
   }
 
   async sleep(msec: number) {

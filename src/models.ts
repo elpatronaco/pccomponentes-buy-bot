@@ -4,11 +4,12 @@ export interface IData {
   link: string
   maxPrice: number
   refreshRate: number
+  phone?: string
   card?: ICard
 }
 
 export interface ICard {
-  num: number
+  num: string
   expiryDate: string
   cvc: string
   name: string

@@ -4,7 +4,7 @@
   "description": "A bot that waits for a selected product to be in stock and then buys it",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "ts-node index"
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,14 @@
   "homepage": "https://github.com/elpatronaco/pccomponentes-buy-bot#readme",
   "dependencies": {
     "chromedriver": "^87.0.4",
+    "node-fetch": "^2.6.1",
     "selenium-webdriver": "^4.0.0-alpha.8",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
   "devDependencies": {
     "@types/chromedriver": "^81.0.0",
+    "@types/node-fetch": "^2.5.7",
     "@types/selenium-webdriver": "^4.0.10"
   }
 }

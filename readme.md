@@ -8,19 +8,20 @@ A small buying bot made in node for pccomponentes.com so you can get the 3080 yo
 
 A few things are needed for the bot to work. Node installed and the chromedriver for the release of your chrome installation (you can install it from [here](https://chromedriver.chromium.org/getting-started))
 
-Install the node modules with the command `npm script` on the project folder. Then you need to edit the parameters in the index.ts file. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required.
+Install the node modules with the command `npm script` on the project folder. Then you need to edit the parameters in the index.ts file. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required. Also the script is able to send SMS to your phone with info about the process, if you don't want to, delete the phone from the parameters.
 
 ```javascript
-let card: ICard = {
-  name: 'AMADOR RIVAS',
-  num: 54025187234213,
-  expiryDate: 0925,
-  cvc: 134
+const card: ICard = {
+  name: 'AMADOR RIVAS LOPEZ',
+  num: '5137422665338597',
+  expiryDate: '0421',
+  cvc: '668'
 }
 
 const app = new Bot({
   email: 'amador@mariscosrecio.com',
   password: 'yoquese',
+  phone: '+34612304123',
   card: card,
   link: 'https://www.pccomponentes.com/msi-rtx-3060-ti-ventus-2x-oc-8gb-gddr6',
   maxPrice: 440,
