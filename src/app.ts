@@ -81,7 +81,7 @@ export default class Bot {
               if (price && price <= this.maxPrice) {
                 stock = true
                 console.log(`PRODUCT IN STOCK! Starting buy process`)
-                await this.sendSms('IN STOCK! ATTEMPTING TO BUY')
+                this.sendSms('IN STOCK! ATTEMPTING TO BUY')
               } else {
                 console.log(
                   `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${
@@ -107,9 +107,9 @@ export default class Bot {
       .findElement(By.xpath(`//*[@id="btnsWishAddBuy"]/button[3]`))
       .then(value => value.click())
       .catch(() => console.log("Couldn't find any buy button"))
-    await this.sleep(2000)
+    await this.sleep(3000)
     await driver.findElement(By.id('GTM-carrito-realizarPedidoPaso1')).then(value => value.click())
-    await this.sleep(2000)
+    await this.sleep(3000)
     // checks if the account has an added card, if not it adds he provided
     await driver.findElements(By.className('h5 card-name')).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
@@ -127,7 +127,7 @@ export default class Bot {
       .then(value => value.click())
       .catch(() => console.error("Couldn't click the buy button. FUUUUUCK"))
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
-    await this.sendSms('DONE. CHECK YOUR ORDERS!')
+    this.sendSms('DONE. CHECK YOUR ORDERS!')
   }
 
   async addCard(driver: WebDriver) {
