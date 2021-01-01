@@ -8,7 +8,7 @@ Un pequeño bot en node para comprar en pccomponentes.com. (**Puede estar desact
 
 Para correr el bot necesitas la última versión de Node instalada y el chromedriver para tu versión de chrome (puedes instalarla desde [aquí](https://chromedriver.chromium.org/getting-started))
 
-Instala los módulos de node con el comando `npm script` en la carpeta del proyecto. Después tienes que cambiar los parámetros en el archivo index.ts. Si no tienes ninguna targeta de crédito/débito en la página la puedes añadir aquí, y a la hora de pagar el bot la añadirá automáticamente y pagará con ella, pero no es requerida. También, el script es capaz de enviarte SMS a tu móvil con información sobre el proceso. Si no quieres que esto ocurra, elimina el teléfono de los parámetros.
+Instala los módulos de node con el comando `npm install` en la carpeta del proyecto. Después tienes que cambiar los parámetros en el archivo index.ts. Si no tienes ninguna targeta de crédito/débito en la página la puedes añadir aquí, y a la hora de pagar el bot la añadirá automáticamente y pagará con ella, pero no es requerida. También, el script es capaz de enviarte SMS a tu móvil con información sobre el proceso. Si no quieres que esto ocurra, elimina el teléfono de los parámetros.
 
 ```javascript
 const card: ICard = {
