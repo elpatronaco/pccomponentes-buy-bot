@@ -33,8 +33,8 @@ export default class Bot {
       await this.runItem(driver)
       await this.buyItem(driver)
     } catch (err) {
+      console.error('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW')
       console.error(err)
-      stop()
     }
   }
 
@@ -46,10 +46,10 @@ export default class Bot {
         // this fills the form and logs in
         await driver
           .findElement(By.css("input[data-cy='email'"))
-          .then(value => value.sendKeys(this.email))
+          .then(value => value.sendKeys(this.email.trim()))
         await driver
           .findElement(By.css("input[data-cy='password'"))
-          .then(value => value.sendKeys(this.password, Key.RETURN))
+          .then(value => value.sendKeys(this.password.trim(), Key.RETURN))
         await this.sleep(3000)
         // await driver.findElement(By.css("button[data-cy='log-in']")).then(value => value.click())
       })
@@ -90,7 +90,7 @@ export default class Bot {
                 )
               }
             })
-          this.sleep(this.refreshRate)
+          await this.sleep(this.refreshRate)
         }
       })
   }
@@ -147,24 +147,24 @@ export default class Bot {
     await driver.switchTo().frame(iFrames[0])
     await driver
       .findElement(By.id('encryptedCardNumber'))
-      .then(value => value.sendKeys(parseInt(this.card?.num!, 10)))
+      .then(value => value.sendKeys(parseInt(this.card?.num.trim()!, 10)))
     await driver.switchTo().defaultContent()
     //
     await driver.switchTo().frame(iFrames[1])
     await driver
       .findElement(By.id('encryptedExpiryDate'))
-      .then(value => value.sendKeys(parseInt(this.card?.expiryDate!, 10)))
+      .then(value => value.sendKeys(parseInt(this.card?.expiryDate.trim()!, 10)))
     await driver.switchTo().defaultContent()
     //
     await driver.switchTo().frame(iFrames[2])
     await driver
       .findElement(By.id('encryptedSecurityCode'))
-      .then(value => value.sendKeys(parseInt(this.card?.cvc!, 10)))
+      .then(value => value.sendKeys(parseInt(this.card?.cvc.trim()!, 10)))
     await driver.switchTo().defaultContent()
     //
     await driver
       .findElements(By.className('adyen-checkout__card__holderName__input'))
-      .then(value => value[0].sendKeys(this.card?.name!))
+      .then(value => value[0].sendKeys(this.card?.name.trim()!))
     await this.sleep(500)
     //
     await driver
