@@ -2,8 +2,8 @@ export interface IData {
   email: string
   password: string
   link: string
-  maxPrice: number
-  refreshRate: number
+  maxPrice?: number
+  refreshRate?: number
   phone?: string
   card?: ICard
 }

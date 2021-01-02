@@ -10,9 +10,9 @@ export default class Bot {
   email: string
   password: string
   link: string
-  maxPrice: number
+  maxPrice?: number
   card?: ICard
-  refreshRate: number
+  refreshRate?: number
   phone?: string
 
   constructor({ email, password, link, maxPrice, card, refreshRate, phone }: IData) {
@@ -78,19 +78,20 @@ export default class Bot {
                 .then(async value => (price = parseFloat(await value.getAttribute('data-price'))))
                 .catch(() => console.error("Couldn't find item price"))
               // checks if current price is below max price before continuing
-              if (price && price <= this.maxPrice) {
+              if (
+                this.maxPrice === undefined ||
+                (price && this.maxPrice && price <= this.maxPrice)
+              ) {
                 stock = true
                 console.log(`PRODUCT IN STOCK! Starting buy process`)
                 this.sendSms('IN STOCK! ATTEMPTING TO BUY')
               } else {
                 console.log(
-                  `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${
-                    price || 'not defined'
-                  }€`
+                  `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
                 )
               }
             })
-          await this.sleep(this.refreshRate)
+          await this.sleep(this.refreshRate || 5000)
         }
       })
   }
