@@ -10,9 +10,10 @@ const card: ICard = {
   cvc: '668'
 }
 
-// initialize the bot class with personal data. Refresh rate is the rate in milliseconds that the bot
-// will refresh the page till stock is available
-// WARNING: Only phone and credit card are unrequired fields. Delete them if you don't want to use them
+// initialize the bot class with personal data.
+// refreshRate is the rate in milliseconds that the bot will refresh the page till stock is available. Default: 5000 milliseconds
+// maxPrice is the maximum price you are willing to pay. If price goes above this the bot will not buy
+// WARNING: Phone and credit card are unrequired fields. Delete them if you don't want to use them
 const app = new Bot({
   email: 'ncxheth03e@safemail.icu',
   password: 'testpassword',

@@ -1,3 +1,5 @@
+import { By } from 'selenium-webdriver'
+
 export interface IData {
   email: string
   password: string
@@ -13,4 +15,9 @@ export interface ICard {
   expiryDate: string
   cvc: string
   name: string
+}
+
+export interface ICardField {
+  elId: string
+  value: string | number
 }
