@@ -114,7 +114,7 @@ export default class Bot {
     // checks if the account has an added card, if not it adds he provided
     await driver.findElements(By.className('h5 card-name')).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
-        this.addCard !== undefined
+        this.card !== undefined
           ? await this.addCard(driver)
           : console.error("Error: You have no card on you account and you didn't provide any")
     })
