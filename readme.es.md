@@ -1,6 +1,6 @@
 # Bot PCComponentes
 
-Un pequeño bot en node para comprar en pccomponentes.com. (**Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request**)
+Un pequeño bot en node para comprar en pccomponentes.com. Desde que encuentra stock hasta que compra pasan de media solo **10 segundos** por limitaciones de Selenium (añadiendo tarjeta de crédito/débito, sin tener que añadirla se acelera ≃ 2 segundos), pero estoy trabajando para hacerlo más rápido aún (_Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request_)
 
 ### [in English](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.md)
 

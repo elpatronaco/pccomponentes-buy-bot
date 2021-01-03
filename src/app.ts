@@ -160,44 +160,29 @@ export default class Bot {
     /* Card values are secured in 3 different IFrames, 
     we'll switch to each one and introduce the values */
     if (iFrames.length === 3) {
+      // Card number
       await driver.switchTo().frame(iFrames[0])
       await driver
         .findElement(By.id('encryptedCardNumber'))
         .then(value => value.sendKeys(parseInt(this.card?.num.trim()!, 10)))
       await driver.switchTo().defaultContent()
-      //
+      // Expiry date
       await driver.switchTo().frame(iFrames[1])
       await driver
         .findElement(By.id('encryptedExpiryDate'))
         .then(value => value.sendKeys(parseInt(this.card?.expiryDate.trim()!, 10)))
       await driver.switchTo().defaultContent()
-      //
+      // CVC
       await driver.switchTo().frame(iFrames[2])
       await driver
         .findElement(By.id('encryptedSecurityCode'))
         .then(value => value.sendKeys(parseInt(this.card?.cvc.trim()!, 10)))
       await driver.switchTo().defaultContent()
-      // TODO: FIX
-      /* const fields: ICardField[] = [
-        { elId: 'encryptedCardNumber', value: parseInt(this.card?.num.trim()!, 10) },
-        { elId: 'encryptedExpiryDate', value: parseInt(this.card?.expiryDate.trim()!, 10) },
-        { elId: 'encryptedSecurityCode', value: parseInt(this.card?.cvc.trim()!, 10) }
-      ]
-      iFrames.forEach(async (iframe, i) => {
-        await driver.switchTo().frame(iframe)
-        await driver
-          .findElement(By.id(fields[i].elId))
-          .then(value => value.sendKeys(fields[i].value))
-          .catch(reason =>
-            console.error(`Didn't find credit card field number ${i}. Reason: ${reason}`)
-          )
-        await driver.switchTo().defaultContent()
-        await this.sleep(200)
-      }) */
+      // Card name
       await driver
         .findElements(By.className('adyen-checkout__card__holderName__input'))
         .then(value => value[0].sendKeys(this.card?.name.trim()!))
-      //
+      // Button add card
       await driver
         .findElements(By.className('adyen-checkout__button adyen-checkout__button--pay'))
         .then(value => value[0].click())

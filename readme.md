@@ -1,6 +1,6 @@
 # PCComponentes buy bot
 
-A small buying bot made in node for pccomponentes.com so you can get the 3080 you're dying for. (**This could be outdated because of changes on the website. Pull requests are welcome**)
+A small buying bot made in node for pccomponentes.com so you can get the 3080 you're dying for. Since it finds stock till it buys there's an avg time of **10 seconds** because of Selenium limitations (while adding credit/debit card, without having to add it speeds up ≃ 2 seconds), but I'm working to take it down further (_This could be outdated because of changes on the website. Pull requests are welcome_)
 
 ### [en Español](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.es.md)
 
