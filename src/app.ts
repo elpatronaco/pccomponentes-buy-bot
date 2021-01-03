@@ -1,6 +1,6 @@
 import chromedriver from 'chromedriver'
 import { ICard, ICardField, IData } from './models'
-import { WebDriver, Builder, By, Key } from 'selenium-webdriver'
+import { WebDriver, Builder, By, Key, WebElementCondition, until } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import fetch from 'node-fetch'
 
@@ -16,7 +16,7 @@ export default class Bot {
   refreshRate?: number
   phone?: string
 
-  // map initialized values to class properties
+  // map props to class properties
   constructor({ email, password, link, maxPrice, card, refreshRate, phone }: IData) {
     ;(this.email = email),
       (this.password = password),
@@ -32,7 +32,7 @@ export default class Bot {
     try {
       // this creates a new chrome window
       const driver = await new Builder().forBrowser('chrome').build()
-      this.sleep(1000)
+      await driver.sleep(1000)
       await this.login(driver)
       await this.runItem(driver)
       await this.buyItem(driver)
@@ -54,7 +54,7 @@ export default class Bot {
         await driver
           .findElement(By.css("input[data-cy='password']"))
           .then(value => value.sendKeys(this.password.trim(), Key.RETURN))
-        await this.sleep(3000)
+        await driver.sleep(3000)
         // checks if logged in
         if (!((await driver.getCurrentUrl()) == 'https://www.pccomponentes.com/'))
           throw Error(`ERROR: Login to account with email ${this.email} failed`)
@@ -72,7 +72,7 @@ export default class Bot {
         let price: number | undefined
         // this loop will play till stock is available, then to the next step
         while (!stock) {
-          await this.sleep(this.refreshRate || 5000)
+          await driver.sleep(this.refreshRate || 5000)
           // every loop iteration the site is refreshed
           await driver
             .navigate()
@@ -107,7 +107,6 @@ export default class Bot {
   }
 
   async buyItem(driver: WebDriver) {
-    await this.sleep(2000)
     // check if there is a cookies modal to accept
     await driver
       .findElement(By.className('btn btn-block btn-primary btn-lg m-t-1 accept-cookie'))
@@ -126,11 +125,13 @@ export default class Bot {
           console.log('Buy button not found, attempting another one...')
         }
     })
-    await this.sleep(3000)
-    await driver.findElement(By.id('GTM-carrito-realizarPedidoPaso1')).then(value => value.click())
-    await this.sleep(3000)
+    // clicks button to make order
+    await driver
+      .wait(until.elementLocated(By.id('GTM-carrito-realizarPedidoPaso1')))
+      .then(async value => await value.click())
+      .catch(() => Error("Didn't find make order button"))
     // checks if the account has an added card, if not it adds the provided one
-    await driver.findElements(By.className('h5 card-name')).then(async value => {
+    await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
         this.card
           ? await this.addCard(driver)
@@ -140,7 +141,7 @@ export default class Bot {
       .findElements(By.className('c-indicator margin-top-0'))
       .then(value => value[0].click())
       .catch(reason => console.error(reason))
-    await this.sleep(500)
+    await driver.sleep(100)
     await driver
       .findElement(By.id('GTM-carrito-finalizarCompra'))
       .then(value => value.click())
@@ -150,13 +151,11 @@ export default class Bot {
   }
 
   async addCard(driver: WebDriver) {
-    await this.sleep(200)
     // clicking add card button
     await driver
-      .findElement(By.id('addNewCard'))
+      .wait(until.elementLocated(By.id('addNewCard')))
       .then(value => value.click())
       .catch(() => console.error("Didn't find the add card button"))
-    await this.sleep(2000)
     const iFrames = await driver.findElements(By.className('js-iframe'))
     /* Card values are secured in 3 different IFrames, 
     we'll switch to each one and introduce the values */
@@ -198,12 +197,11 @@ export default class Bot {
       await driver
         .findElements(By.className('adyen-checkout__card__holderName__input'))
         .then(value => value[0].sendKeys(this.card?.name.trim()!))
-      await this.sleep(500)
       //
       await driver
         .findElements(By.className('adyen-checkout__button adyen-checkout__button--pay'))
         .then(value => value[0].click())
-      await this.sleep(500)
+      await driver.sleep(300)
     } else {
       throw Error(`ERROR: Only ${iFrames.length} found. There must be 3 iframes`)
     }
@@ -230,9 +228,5 @@ export default class Bot {
       } catch (err) {
         console.error(`Couldn't send SMS: ${err}`)
       }
-  }
-
-  async sleep(msec: number) {
-    return new Promise(resolve => setTimeout(resolve, msec))
   }
 }
