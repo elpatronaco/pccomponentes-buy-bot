@@ -64,20 +64,15 @@ export default class Bot {
 
   async runItem(driver: WebDriver) {
     // navigates to the item link provided
-    await driver
-      .navigate()
-      .to(this.link)
-      .then(async () => {
-        let stock: boolean = false
-        let price: number | undefined
-        // this loop will play till stock is available, then to the next step
-        while (!stock) {
-          await driver.sleep(this.refreshRate || 5000)
-          // every loop iteration the site is refreshed
-          await driver
-            .navigate()
-            .refresh()
-            .catch(() => driver.navigate().to(this.link))
+    let stock: boolean = false
+    let price: number | undefined
+    while (!stock) {
+      // this loop will play till stock is available, then to the next step
+      await driver.sleep(this.refreshRate || 5000)
+      await driver
+        .navigate()
+        .to(this.link)
+        .then(async () => {
           // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
           // Else, proceeds to check the price and compare it to the maximum price if provided
           await driver
@@ -102,8 +97,9 @@ export default class Bot {
                 )
               }
             })
-        }
-      })
+        })
+        .catch(() => Error('ERROR: Provided link invalid'))
+    }
   }
 
   async buyItem(driver: WebDriver) {
@@ -137,15 +133,16 @@ export default class Bot {
           ? await this.addCard(driver)
           : console.error("ERROR: You have no card on your account and you didn't provide any")
     })
+    const conditionsCheck = (await driver.findElements(By.className('c-indicator margin-top-0')))[0]
     await driver
-      .findElements(By.className('c-indicator margin-top-0'))
-      .then(value => value[0].click())
-      .catch(reason => console.error(reason))
-    await driver.sleep(100)
+      .wait(until.elementIsEnabled(conditionsCheck))
+      .then(() => conditionsCheck.click())
+      .catch(() => Error("Couldn't click conditions checkbox"))
+    const orderButton = await driver.findElement(By.id('GTM-carrito-finalizarCompra'))
     await driver
-      .findElement(By.id('GTM-carrito-finalizarCompra'))
-      .then(value => value.click())
-      .catch(() => console.error("Couldn't click the buy button. FUUUUUCK"))
+      .wait(until.elementIsEnabled(orderButton))
+      .then(() => orderButton.click())
+      .catch(() => Error("Couldn't click the buy button. FUUUUUCK"))
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
     this.sendSms('DONE. CHECK YOUR ORDERS!')
   }
@@ -186,7 +183,6 @@ export default class Bot {
       await driver
         .findElements(By.className('adyen-checkout__button adyen-checkout__button--pay'))
         .then(value => value[0].click())
-      await driver.sleep(300)
     } else {
       throw Error(`ERROR: Only ${iFrames.length} found. There must be 3 iframes`)
     }
