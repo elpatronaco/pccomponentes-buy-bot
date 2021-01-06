@@ -153,7 +153,7 @@ export default class Bot {
           await driver.sleep(1000)
         }
     })
-    await driver.sleep(1000)
+    await driver.sleep(2000)
     const conditionsCheck = (await driver.findElements(By.className('c-indicator margin-top-0')))[0]
     await driver
       .wait(until.elementIsEnabled(conditionsCheck))
