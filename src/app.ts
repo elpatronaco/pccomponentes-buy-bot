@@ -1,5 +1,5 @@
 import chromedriver from 'chromedriver'
-import { ICard, ICardField, IData } from './models'
+import { ICard, ICardField, IProps } from './models'
 import { WebDriver, Builder, By, Key, WebElementCondition, until } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import fetch from 'node-fetch'
@@ -15,16 +15,27 @@ export default class Bot {
   card?: ICard
   refreshRate?: number
   phone?: string
+  debug: boolean
 
   // map props to class properties
-  constructor({ email, password, link, maxPrice, card, refreshRate, phone }: IData) {
+  constructor({
+    email,
+    password,
+    link,
+    maxPrice,
+    card,
+    refreshRate,
+    phone,
+    debug = false
+  }: IProps) {
     ;(this.email = email),
       (this.password = password),
       (this.link = link),
       (this.maxPrice = maxPrice),
       (this.card = card),
       (this.refreshRate = refreshRate),
-      (this.phone = phone)
+      (this.phone = phone),
+      (this.debug = debug)
   }
 
   // main method
@@ -142,6 +153,7 @@ export default class Bot {
           await driver.sleep(1000)
         }
     })
+    await driver.sleep(1000)
     const conditionsCheck = (await driver.findElements(By.className('c-indicator margin-top-0')))[0]
     await driver
       .wait(until.elementIsEnabled(conditionsCheck))
@@ -150,7 +162,9 @@ export default class Bot {
     const orderButton = await driver.findElement(By.id('GTM-carrito-finalizarCompra'))
     await driver
       .wait(until.elementIsEnabled(orderButton))
-      .then(() => orderButton.click())
+      .then(() => {
+        if (!this.debug) orderButton.click()
+      })
       .catch(() => Error("Couldn't click the buy button. FUUUUUCK"))
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
     this.sendSms('DONE. CHECK YOUR ORDERS!')

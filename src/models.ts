@@ -1,6 +1,6 @@
 import { By } from 'selenium-webdriver'
 
-export interface IData {
+export interface IProps {
   email: string
   password: string
   link: string
@@ -8,6 +8,7 @@ export interface IData {
   refreshRate?: number
   phone?: string
   card?: ICard
+  debug: boolean
 }
 
 export interface ICard {
