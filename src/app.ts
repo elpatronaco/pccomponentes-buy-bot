@@ -129,9 +129,18 @@ export default class Bot {
     // checks if the account has an added card, if not it adds the provided one
     await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
-        this.card
-          ? await this.addCard(driver)
-          : console.error("ERROR: You have no card on your account and you didn't provide any")
+        if (this.card) {
+          await this.addCard(driver)
+        } else {
+          console.log(
+            "You don't have any card on your account and you didn't provide any. Selecting transfer as payment"
+          )
+          await driver
+            .findElements(By.className('js-payment js-parent qa-payment-5  payment-select'))
+            .then(value => value[0].click())
+            .catch(() => Error("Didn't find transfer payment button"))
+          await driver.sleep(1000)
+        }
     })
     const conditionsCheck = (await driver.findElements(By.className('c-indicator margin-top-0')))[0]
     await driver
