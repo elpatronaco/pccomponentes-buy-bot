@@ -153,21 +153,22 @@ export default class Bot {
           await driver.sleep(1000)
         }
     })
-    await driver.sleep(2000)
-    const conditionsCheck = (await driver.findElements(By.className('c-indicator margin-top-0')))[0]
-    await driver
-      .wait(until.elementIsEnabled(conditionsCheck))
-      .then(() => conditionsCheck.click())
-      .catch(() => Error("Couldn't click conditions checkbox"))
     const orderButton = await driver.findElement(By.id('GTM-carrito-finalizarCompra'))
     await driver
       .wait(until.elementIsEnabled(orderButton))
-      .then(() => {
+      .then(async () => {
+        const conditionsCheck = (
+          await driver.findElements(By.className('c-indicator margin-top-0'))
+        )[0]
+        await driver
+          .wait(until.elementIsEnabled(conditionsCheck))
+          .then(() => conditionsCheck.click())
+          .catch(() => Error("Couldn't click conditions checkbox"))
         if (!this.debug) orderButton.click()
+        for (var i = 0; i < 50; i++) console.log('COMPRADO')
+        this.sendSms('DONE. CHECK YOUR ORDERS!')
       })
       .catch(() => Error("Couldn't click the buy button. FUUUUUCK"))
-    for (var i = 0; i < 50; i++) console.log('COMPRADO')
-    this.sendSms('DONE. CHECK YOUR ORDERS!')
   }
 
   async addCard(driver: WebDriver) {
