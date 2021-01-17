@@ -23,7 +23,7 @@ const app = new Bot({
     'https://www.pccomponentes.com/asus-rog-strix-b450-f-gaming?gclid=CjwKCAiArbv_BRA8EiwAYGs23DIkRpeHU8hEGhBC39vLm7gGBywY7BNbjrupHHZIsejeMdpqWNEx8BoC3agQAvD_BwE&',
   maxPrice: 440,
   refreshRate: 8000
-  debug: true
+  debug: false
 })
 
 app.run()
