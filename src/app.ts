@@ -129,7 +129,7 @@ export default class Bot {
     await driver.navigate().to('https://www.pccomponentes.com/cart/order')
 
     // checks if the account has an added card, if not it adds the provided one
-    /* await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
+    await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
         if (this.card) {
           await this.addCard(driver)
@@ -142,7 +142,7 @@ export default class Bot {
             .then(value => value[0].click())
           await driver.sleep(500)
         }
-    }) */
+    })
 
     // i don't give a shit, force click the buy button
     while ((await driver.getCurrentUrl()) === 'https://www.pccomponentes.com/cart/order') {
