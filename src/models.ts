@@ -6,9 +6,9 @@ export interface IProps {
   link: string
   maxPrice?: number
   refreshRate?: number
-  phone?: string
   card?: ICard
   debug: boolean
+  telegrambot?: ITelegramBot
 }
 
 export interface ICard {
@@ -18,7 +18,7 @@ export interface ICard {
   name: string
 }
 
-export interface ICardField {
-  elId: string
-  value: string | number
+export interface ITelegramBot {
+  apiToken: string
+  user: string
 }

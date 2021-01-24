@@ -1,8 +1,9 @@
 import chromedriver from 'chromedriver'
-import { ICard, ICardField, IProps } from './models'
+import { ICard, IProps, ITelegramBot } from './models'
 import { WebDriver, Builder, By, Key, WebElementCondition, until } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
-import fetch from 'node-fetch'
+import { Telegraf } from 'telegraf'
+import { elementIsDisabled } from 'selenium-webdriver/lib/until'
 
 chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build())
 
@@ -16,6 +17,8 @@ export default class Bot {
   refreshRate?: number
   phone?: string
   debug: boolean
+  telegrambot?: ITelegramBot
+  telegraf?: Telegraf
 
   // map props to class properties
   constructor({
@@ -25,7 +28,7 @@ export default class Bot {
     maxPrice,
     card,
     refreshRate,
-    phone,
+    telegrambot,
     debug = false
   }: IProps) {
     ;(this.email = email),
@@ -34,8 +37,8 @@ export default class Bot {
       (this.maxPrice = maxPrice),
       (this.card = card),
       (this.refreshRate = refreshRate),
-      (this.phone = phone),
-      (this.debug = debug)
+      (this.debug = debug),
+      (this.telegrambot = telegrambot)
   }
 
   // main method
@@ -43,6 +46,7 @@ export default class Bot {
     try {
       // this creates a new chrome window
       const driver = await new Builder().forBrowser('chrome').build()
+      if (this.telegrambot) this.telegraf = new Telegraf(this.telegrambot.apiToken)
       await driver.sleep(1000)
       await this.login(driver)
       await this.runItem(driver)
@@ -101,7 +105,7 @@ export default class Bot {
               ) {
                 stock = true
                 console.log(`PRODUCT IN STOCK! Starting buy process`)
-                this.sendSms('IN STOCK! ATTEMPTING TO BUY')
+                // this.sendMsg('IN STOCK! ATTEMPTING TO BUY')
               } else {
                 console.log(
                   `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
@@ -109,36 +113,23 @@ export default class Bot {
               }
             })
         })
-        .catch(() => Error('ERROR: Provided link invalid'))
     }
   }
 
   async buyItem(driver: WebDriver) {
-    // check if there is a cookies modal to accept
     await driver
-      .findElement(By.className('btn btn-block btn-primary btn-lg m-t-1 accept-cookie'))
-      .then(value => value.click())
-      .catch(() => console.log('No cookie accept button to click'))
-    // clicks on buy button on product page. There are 3 buttons that show up depending on the current window size.
-    // the bot will attempt to click all of them
-    const buyButtons = await driver.findElements(By.className('buy-button'))
-    let clickedButton = false
-    buyButtons.forEach(async buyButton => {
-      if (!clickedButton)
-        try {
-          await buyButton.click()
-          clickedButton = true
-        } catch {
-          console.log('Buy button not found, attempting another one...')
-        }
-    })
-    // clicks button to make order
-    await driver
-      .wait(until.elementLocated(By.id('GTM-carrito-realizarPedidoPaso1')))
-      .then(async value => await value.click())
-      .catch(() => Error("Didn't find make order button"))
+      .findElement(By.id('contenedor-principal'))
+      .then(
+        async value =>
+          await driver
+            .navigate()
+            .to(`https://www.pccomponentes.com/cart/addItem/${await value.getAttribute('data-id')}`)
+      )
+
+    await driver.navigate().to('https://www.pccomponentes.com/cart/order')
+
     // checks if the account has an added card, if not it adds the provided one
-    await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
+    /* await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
       if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
         if (this.card) {
           await this.addCard(driver)
@@ -149,26 +140,21 @@ export default class Bot {
           await driver
             .findElements(By.className('js-payment js-parent qa-payment-5  payment-select'))
             .then(value => value[0].click())
-            .catch(() => Error("Didn't find transfer payment button"))
-          await driver.sleep(1000)
+          await driver.sleep(500)
         }
-    })
-    const orderButton = await driver.findElement(By.id('GTM-carrito-finalizarCompra'))
-    await driver
-      .wait(until.elementIsEnabled(orderButton))
-      .then(async () => {
-        const conditionsCheck = (
-          await driver.findElements(By.className('c-indicator margin-top-0'))
-        )[0]
+    }) */
+
+    // i don't give a shit, force click the buy button
+    while ((await driver.getCurrentUrl()) === 'https://www.pccomponentes.com/cart/order') {
+      try {
         await driver
-          .wait(until.elementIsEnabled(conditionsCheck))
-          .then(() => conditionsCheck.click())
-          .catch(() => Error("Couldn't click conditions checkbox"))
-        if (!this.debug) orderButton.click()
-        for (var i = 0; i < 50; i++) console.log('COMPRADO')
-        this.sendSms('DONE. CHECK YOUR ORDERS!')
-      })
-      .catch(() => Error("Couldn't click the buy button. FUUUUUCK"))
+          .findElements(By.className('c-indicator margin-top-0'))
+          .then(values => values[0].click())
+        await driver.findElement(By.id('GTM-carrito-finalizarCompra')).then(value => value.click())
+      } catch {}
+    }
+
+    for (var i = 0; i < 50; i++) console.log('COMPRADO')
   }
 
   async addCard(driver: WebDriver) {
@@ -212,26 +198,11 @@ export default class Bot {
     }
   }
 
-  async sendSms(msg: string) {
-    if (this.phone !== undefined)
-      try {
-        await fetch('https://rest-api.d7networks.com/secure/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic aWlheTMyMjI6elIyNDVRVGY='
-          },
-          body: JSON.stringify({
-            // @ts-ignore
-            content: msg,
-            from: 'PCCOM-BOT',
-            to: this.phone!
-          })
-        })
-          .then(() => console.log(`SMS sent successfully: ${msg}`))
-          .catch(() => console.error(`Error sending SMS: ${msg}`))
-      } catch (err) {
-        console.error(`Couldn't send SMS: ${err}`)
-      }
+  sendMsg(msg: string) {
+    try {
+      if (this.telegrambot) this.telegraf?.telegram.sendMessage(this.telegrambot.user, msg)
+    } catch (err) {
+      console.error(err)
+    }
   }
 }
