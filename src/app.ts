@@ -91,27 +91,36 @@ export default class Bot {
           // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
           // Else, proceeds to check the price and compare it to the maximum price if provided
           await driver
-            .findElement(By.id('notify-me'))
-            .then(() => console.log(`Product is not yet in stock (${new Date().toUTCString()})`))
-            .catch(async () => {
+            .findElement(By.id('btnsWishAddBuy'))
+            .then(async () => {
               await driver
-                .findElement(By.id('precio-main'))
-                .then(async value => (price = parseFloat(await value.getAttribute('data-price'))))
-                .catch(() => console.error("Couldn't find item price"))
-              // checks if current price is below max price before continuing
-              if (
-                this.maxPrice === undefined ||
-                (price && this.maxPrice && price <= this.maxPrice)
-              ) {
-                stock = true
-                console.log(`PRODUCT IN STOCK! Starting buy process`)
-                // this.sendMsg('IN STOCK! ATTEMPTING TO BUY')
-              } else {
-                console.log(
-                  `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
+                .findElement(By.id('notify-me'))
+                .then(() =>
+                  console.log(`Product is not yet in stock (${new Date().toUTCString()})`)
                 )
-              }
+                .catch(async () => {
+                  await driver
+                    .findElement(By.id('precio-main'))
+                    .then(
+                      async value => (price = parseFloat(await value.getAttribute('data-price')))
+                    )
+                    .catch(() => console.error("Couldn't find item price"))
+                  // checks if current price is below max price before continuing
+                  if (
+                    this.maxPrice === undefined ||
+                    (price && this.maxPrice && price <= this.maxPrice)
+                  ) {
+                    stock = true
+                    console.log(`PRODUCT IN STOCK! Starting buy process`)
+                    // this.sendMsg('IN STOCK! ATTEMPTING TO BUY')
+                  } else {
+                    console.log(
+                      `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
+                    )
+                  }
+                })
             })
+            .catch(() => console.log(`Product is not yet in stock (${new Date().toUTCString()})`))
         })
     }
   }
@@ -125,6 +134,20 @@ export default class Bot {
             .navigate()
             .to(`https://www.pccomponentes.com/cart/addItem/${await value.getAttribute('data-id')}`)
       )
+      .catch(async () => {
+        console.log('Not found product id. Forcing click of all buy buttons')
+        const buyButtons = await driver.findElements(By.className('buy-button'))
+        let clickedButton = false
+        buyButtons.forEach(async buyButton => {
+          if (!clickedButton)
+            try {
+              await buyButton.click()
+              clickedButton = true
+            } catch {
+              console.log('Buy button not found, attempting another one...')
+            }
+        })
+      })
 
     await driver.navigate().to('https://www.pccomponentes.com/cart/order')
 
@@ -150,7 +173,10 @@ export default class Bot {
         await driver
           .findElements(By.className('c-indicator margin-top-0'))
           .then(values => values[0].click())
-        await driver.findElement(By.id('GTM-carrito-finalizarCompra')).then(value => value.click())
+        if (!this.debug)
+          await driver
+            .findElement(By.id('GTM-carrito-finalizarCompra'))
+            .then(value => value.click())
       } catch {}
     }
 
