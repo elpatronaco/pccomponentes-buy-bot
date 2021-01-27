@@ -1,5 +1,5 @@
 import chromedriver from 'chromedriver'
-import { ICard, IProps, ITelegramBot } from './models'
+import { ICard, IProps } from './models'
 import { WebDriver, Builder, By, Key, WebElementCondition, until } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { Telegraf } from 'telegraf'
@@ -17,28 +17,16 @@ export default class Bot {
   refreshRate?: number
   phone?: string
   debug: boolean
-  telegrambot?: ITelegramBot
-  telegraf?: Telegraf
 
   // map props to class properties
-  constructor({
-    email,
-    password,
-    link,
-    maxPrice,
-    card,
-    refreshRate,
-    telegrambot,
-    debug = false
-  }: IProps) {
+  constructor({ email, password, link, maxPrice, card, refreshRate, debug = false }: IProps) {
     ;(this.email = email),
       (this.password = password),
       (this.link = link),
       (this.maxPrice = maxPrice),
       (this.card = card),
       (this.refreshRate = refreshRate),
-      (this.debug = debug),
-      (this.telegrambot = telegrambot)
+      (this.debug = debug)
   }
 
   // main method
@@ -46,7 +34,6 @@ export default class Bot {
     try {
       // this creates a new chrome window
       const driver = await new Builder().forBrowser('chrome').build()
-      if (this.telegrambot) this.telegraf = new Telegraf(this.telegrambot.apiToken)
       await driver.sleep(1000)
       await this.login(driver)
       await this.runItem(driver)
@@ -221,14 +208,6 @@ export default class Bot {
         .then(value => value[0].click())
     } else {
       throw Error(`ERROR: Only ${iFrames.length} found. There must be 3 iframes`)
-    }
-  }
-
-  sendMsg(msg: string) {
-    try {
-      if (this.telegrambot) this.telegraf?.telegram.sendMessage(this.telegrambot.user, msg)
-    } catch (err) {
-      console.error(err)
     }
   }
 }

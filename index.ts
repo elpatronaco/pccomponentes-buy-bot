@@ -17,7 +17,6 @@ const card: ICard = {
 const app = new Bot({
   email: 'ncxheth03e@safemail.icu',
   password: 'testpassword',
-  phone: '+34612304123',
   card: card,
   link: 'https://www.pccomponentes.com/evga-geforce-rtx-3060-ti-ftw3-ultra-8gb-gddr6',
   maxPrice: 500,
