@@ -4,7 +4,6 @@ export interface IProps {
   email: string
   password: string
   link: string
-  phone?: string
   maxPrice?: number
   refreshRate?: number
   card?: ICard

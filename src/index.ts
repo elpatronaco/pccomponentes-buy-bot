@@ -1,5 +1,5 @@
-import { ICard } from './src/models'
-import Bot from './src/app'
+import { ICard } from './models'
+import Bot from './app'
 
 // credit/debit card info. This is not required, but be sure to have at least one card available in
 // your account, or else the bot will fail at purchasing the product when it becomes available

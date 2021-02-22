@@ -1,9 +1,7 @@
 import chromedriver from 'chromedriver'
 import { ICard, IProps } from './models'
-import { WebDriver, Builder, By, Key, WebElementCondition, until } from 'selenium-webdriver'
+import { WebDriver, Builder, By, Key, until } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
-import { Telegraf } from 'telegraf'
-import { elementIsDisabled } from 'selenium-webdriver/lib/until'
 
 chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build())
 
