@@ -19,7 +19,7 @@ const app = new Bot({
     'https://www.pccomponentes.com/pccom-platinum-amd-ryzen-7-5800x-32gb-1tbssd-2tb-rx6800xt?gclid=Cj0KCQiA-OeBBhDiARIsADyBcE463GmlK4t8G5t-HQ7epqQxe0S1ftyPFO1zE7C8jT5zlxWDKJ_5SAoaArnnEALw_wcB&',
   maxPrice: 3000, // maxPrice is the maximum price you are willing to pay. If price goes above this the bot will not buy
   refreshRate: 1000, // rate in milliseconds that the bot will refresh the page till stock is available. Default: 1000 milliseconds (1 second)
-  debug: true // SHOULD BE FALSE
+  debug: false // SHOULD BE FALSE
 })
 
 app.run()
