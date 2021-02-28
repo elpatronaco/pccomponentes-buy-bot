@@ -1,9 +1,5 @@
-import chromedriver from 'chromedriver'
-import { ICard, IProps } from './models'
-import { WebDriver, Builder, By, Key, until } from 'selenium-webdriver'
-import chrome from 'selenium-webdriver/chrome'
-
-chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build())
+import puppeteer from 'puppeteer'
+import { ICard, IFrameContent, IProps } from './models'
 
 export default class Bot {
   // class properties
@@ -31,181 +27,178 @@ export default class Bot {
   async run() {
     try {
       // this creates a new chrome window
-      const driver = await new Builder().forBrowser('chrome').build()
-      await driver.sleep(1000)
-      await this.login(driver)
-      await this.runItem(driver)
-      await this.buyItem(driver)
+      const browser = await puppeteer.launch(this.debug ? { headless: false } : { headless: true })
+
+      const page = await browser.newPage()
+
+      await this.login(page)
+      await this.runItem(page)
+      await this.buyItem(page)
     } catch (err) {
       console.error('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW')
       console.error(err)
     }
   }
 
-  async login(driver: WebDriver) {
-    await driver
-      .navigate()
-      .to('https://www.pccomponentes.com/login')
+  async login(page: puppeteer.Page) {
+    await page
+      .goto('https://www.pccomponentes.com/login', { waitUntil: 'networkidle2' })
       .then(async () => {
         // fills the form and logs in
-        await driver
-          .findElement(By.css("input[data-cy='email']"))
-          .then(value => value.sendKeys(this.email.trim()))
-        await driver
-          .findElement(By.css("input[data-cy='password']"))
-          .then(value => value.sendKeys(this.password.trim(), Key.RETURN))
-        await driver.sleep(3000)
+        await page.$("input[data-cy='email']").then(async value => {
+          await value?.focus()
+          await page.keyboard.type(this.email.trim())
+        })
+        await page.$("input[data-cy='password']").then(async value => {
+          await value?.focus()
+          await page.keyboard.type(this.password.trim())
+          await page.keyboard.press('Enter')
+        })
+        await page.waitForNavigation({ waitUntil: 'networkidle2' })
         // checks if logged in
-        if (!((await driver.getCurrentUrl()) == 'https://www.pccomponentes.com/'))
+        if (!(page.url() == 'https://www.pccomponentes.com/'))
           throw Error(`ERROR: Login to account with email ${this.email} failed`)
         console.log(`Successfully logged in as ${this.email}`)
       })
   }
 
-  async runItem(driver: WebDriver) {
+  async runItem(page: puppeteer.Page) {
     // navigates to the item link provided
     let stock: boolean = false
     let price: number | undefined
     while (!stock) {
       // this loop will play till stock is available, then to the next step
-      await driver.sleep(this.refreshRate || 5000)
-      await driver
-        .navigate()
-        .to(this.link)
-        .then(async () => {
-          // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
-          // Else, proceeds to check the price and compare it to the maximum price if provided
-          await driver
-            .findElement(By.id('btnsWishAddBuy'))
-            .then(async () => {
-              await driver
-                .findElement(By.id('notify-me'))
-                .then(() =>
-                  console.log(`Product is not yet in stock (${new Date().toUTCString()})`)
-                )
-                .catch(async () => {
-                  await driver
-                    .findElement(By.id('precio-main'))
-                    .then(
-                      async value => (price = parseFloat(await value.getAttribute('data-price')))
-                    )
-                    .catch(() => console.error("Couldn't find item price"))
-                  // checks if current price is below max price before continuing
-                  if (
-                    this.maxPrice === undefined ||
-                    (price && this.maxPrice && price <= this.maxPrice)
-                  ) {
-                    stock = true
-                    console.log(`PRODUCT IN STOCK! Starting buy process`)
-                    // this.sendMsg('IN STOCK! ATTEMPTING TO BUY')
-                  } else {
-                    console.log(
-                      `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
-                    )
-                  }
-                })
-            })
-            .catch(() => console.log(`Product is not yet in stock (${new Date().toUTCString()})`))
-        })
+      await page.waitForTimeout(this.refreshRate || 5000)
+      await page.goto(this.link)
+      // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
+      const buyButtons = await page.$('#btnsWishAddBuy')
+      const notifyMeButton = await page.$('#notify-me')
+
+      if (buyButtons !== null && notifyMeButton === null) {
+        const priceAtt = await page.evaluate(
+          'document.getElementById("precio-main").getAttribute("data-price")'
+        )
+        if (priceAtt) price = Number(priceAtt)
+        // checks if current price is below max price before continuing
+        if (!this.maxPrice || (this.maxPrice && price && price <= this.maxPrice)) {
+          stock = true
+          console.log(`PRODUCT IN STOCK! Starting buy process`)
+        } else {
+          console.log(
+            price
+              ? `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
+              : 'Price not found'
+          )
+        }
+      } else {
+        // Else, proceeds to check the price and compare it to the maximum price if provided
+        console.log(`Product is not yet in stock (${new Date().toUTCString()})`)
+      }
     }
   }
 
-  async buyItem(driver: WebDriver) {
-    await driver
-      .findElement(By.id('contenedor-principal'))
-      .then(
-        async value =>
-          await driver
-            .navigate()
-            .to(`https://www.pccomponentes.com/cart/addItem/${await value.getAttribute('data-id')}`)
-      )
-      .catch(async () => {
-        console.log('Not found product id. Forcing click of all buy buttons')
-        const buyButtons = await driver.findElements(By.className('buy-button'))
-        let clickedButton = false
-        buyButtons.forEach(async buyButton => {
-          if (!clickedButton)
-            try {
-              await buyButton.click()
-              clickedButton = true
-            } catch {
-              console.log('Buy button not found, attempting another one...')
-            }
-        })
+  async buyItem(page: puppeteer.Page) {
+    const dataId = await page.evaluate(
+      "document.getElementById('contenedor-principal').getAttribute('data-id')"
+    )
+    if (dataId !== null)
+      await page.goto(`https://www.pccomponentes.com/cart/addItem/${dataId}`, {
+        waitUntil: 'networkidle2'
       })
+    else {
+      console.log('Not found product id. Forcing click of all buy buttons')
+      const buyButtons = await page.$$('.buy-button')
+      let clickedButton = false
+      buyButtons.forEach(async buyButton => {
+        if (!clickedButton)
+          try {
+            await buyButton.click()
+            clickedButton = true
+          } catch {
+            console.log('Buy button not found, attempting another one...')
+          }
+      })
+    }
 
-    await driver.navigate().to('https://www.pccomponentes.com/cart/order')
+    await page.goto('https://www.pccomponentes.com/cart/order', { waitUntil: 'networkidle2' })
 
-    // checks if the account has an added card, if not it adds the provided one
-    await driver.wait(until.elementsLocated(By.className('h5 card-name'))).then(async value => {
-      if ((await value[0].getAttribute('outerText')) === 'Nombre aquí')
-        if (this.card) {
-          await this.addCard(driver)
-        } else {
-          console.log(
-            "You don't have any card on your account and you didn't provide any. Selecting transfer as payment"
-          )
-          await driver
-            .findElements(By.className('js-payment js-parent qa-payment-5  payment-select'))
-            .then(value => value[0].click())
-          await driver.sleep(500)
-        }
-    })
+    // const cardNameText = await page.$eval("span[class='h5 card-name']", el => el.textContent)
 
-    // i don't give a shit, force click the buy button
-    while ((await driver.getCurrentUrl()) === 'https://www.pccomponentes.com/cart/order') {
-      try {
-        await driver
-          .findElements(By.className('c-indicator margin-top-0'))
-          .then(values => values[0].click())
-        if (!this.debug)
-          await driver
-            .findElement(By.id('GTM-carrito-finalizarCompra'))
-            .then(value => value.click())
-      } catch {}
+    const paymentMethods = await page.$$("input[name='metodoPago']")
+
+    // FIXME: checks if the account has an added card, if not it adds the provided one
+    /* if (this.card && cardNameText && cardNameText === 'Nombre aquí') {
+      console.log('Adding provided credit/debit card')
+
+      paymentMethods[0].click()
+      await this.addCard(page)
+    } else {
+      console.log(
+        "You don't have any card on your account and you didn't provide any or you already have one card. Selecting transfer as payment"
+      )
+
+      // transfer button
+      await paymentMethods[2].click()
+    } */
+
+    console.log('\x1b[33m%s\x1b[0m', 'ADDING CARD BEING WORKED ON. SELECTED TRANSFER AS PAYMENT')
+    await paymentMethods[2].click()
+
+    while (
+      (await page.$eval('#GTM-carrito-finalizarCompra', el => el.textContent)) !==
+      'PAGAR Y FINALIZAR'
+    )
+      await page.waitForTimeout(200)
+
+    while (page.url() === 'https://www.pccomponentes.com/cart/order') {
+      await page.$eval('#pccom-conditions', el => (el as HTMLElement).click())
+      if (!this.debug)
+        await page.$eval('#GTM-carrito-finalizarCompra', el => (el as HTMLElement).click())
     }
 
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
   }
 
-  async addCard(driver: WebDriver) {
+  async addCard(page: puppeteer.Page) {
     // clicking add card button
-    await driver
-      .wait(until.elementLocated(By.id('addNewCard')))
-      .then(value => value.click())
-      .catch(() => console.error("Didn't find the add card button"))
-    const iFrames = await driver.findElements(By.className('js-iframe'))
-    /* Card values are secured in 3 different IFrames, 
-    we'll switch to each one and introduce the values */
-    if (iFrames.length === 3) {
-      // Card number
-      await driver.switchTo().frame(iFrames[0])
-      await driver
-        .findElement(By.id('encryptedCardNumber'))
-        .then(value => value.sendKeys(parseInt(this.card?.num.trim()!, 10)))
-      await driver.switchTo().defaultContent()
-      // Expiry date
-      await driver.switchTo().frame(iFrames[1])
-      await driver
-        .findElement(By.id('encryptedExpiryDate'))
-        .then(value => value.sendKeys(parseInt(this.card?.expiryDate.trim()!, 10)))
-      await driver.switchTo().defaultContent()
-      // CVC
-      await driver.switchTo().frame(iFrames[2])
-      await driver
-        .findElement(By.id('encryptedSecurityCode'))
-        .then(value => value.sendKeys(parseInt(this.card?.cvc.trim()!, 10)))
-      await driver.switchTo().defaultContent()
-      // Card name
-      await driver
-        .findElements(By.className('adyen-checkout__card__holderName__input'))
-        .then(value => value[0].sendKeys(this.card?.name.trim()!))
-      // Button add card
-      await driver
-        .findElements(By.className('adyen-checkout__button adyen-checkout__button--pay'))
-        .then(value => value[0].click())
-    } else {
-      throw Error(`ERROR: Only ${iFrames.length} found. There must be 3 iframes`)
-    }
+    const addCard = await page.waitForSelector('#addNewCard')
+
+    if (addCard) await addCard.click()
+    else console.error("Didn't find add card button")
+
+    const cardFrames = await page.$$("iframe[class='js-iframe']")
+
+    const data: IFrameContent[] = [
+      {
+        frame: cardFrames[0],
+        value: this.card!.num,
+        inputId: 'encryptedCardNumber'
+      },
+      {
+        frame: cardFrames[1],
+        value: this.card!.expiryDate,
+        inputId: 'encryptedExpiryDate'
+      },
+      {
+        frame: cardFrames[2],
+        value: this.card!.cvc,
+        inputId: 'encryptedSecurityCode'
+      }
+    ]
+
+    data.forEach(async d => {
+      const input = await d.frame.$(`input[id='${d.inputId}']`)
+      if (input) {
+        await input.focus()
+        await page.keyboard.type(d.value)
+      } else console.error(`Inputbox of credit card with id ${d.inputId} not found`)
+    })
+
+    const saveCardButton = await page.waitForSelector(
+      "button[class='adyen-checkout__button adyen-checkout__button--pay']"
+    )
+
+    if (saveCardButton) await saveCardButton.click()
+    else console.error('Save credit card button not found')
   }
 }

@@ -1,14 +1,26 @@
 # Bot PCComponentes
 
-Un pequeño bot en node para comprar en pccomponentes.com. Desde que encuentra stock hasta que compra pasan de media solo **10 segundos** por limitaciones de Selenium (añadiendo tarjeta de crédito/débito, sin tener que añadirla se acelera ≃ 2 segundos), pero estoy trabajando para hacerlo más rápido aún (_Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request_)
+Un pequeño bot en node para comprar en pccomponentes.com. (_Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request_)
 
 ### [in English](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.md)
 
 ## Tutorial
 
-Para correr el bot necesitas la última versión de Node instalada y el chromedriver para tu versión de chrome (puedes instalarla desde [aquí](https://chromedriver.chromium.org/getting-started))
+Para correr el bot necesitas la última versión de [Node](https://nodejs.org/es/download/) instalada y el [chromedriver](https://chromedriver.chromium.org/getting-started) para tu versión de chrome
 
-Instala los módulos de node con el comando `npm install` en la carpeta del proyecto. Después tienes que cambiar los parámetros en el archivo index.ts. Si no tienes ninguna targeta de crédito/débito en la página la puedes añadir aquí, y a la hora de pagar el bot la añadirá automáticamente y pagará con ella, pero no es requerida. También, el script es capaz de enviarte SMS a tu móvil con información sobre el proceso. Si no quieres que esto ocurra, elimina el teléfono de los parámetros.
+Abre la consola y escribe
+
+```console
+cd [directorio del proyecto, ej /usr/app/ o C://app]
+```
+
+Luego instala los módulos de node con el comando
+
+```console
+npm install
+```
+
+en la carpeta del proyecto. Después tienes que cambiar los parámetros en el archivo index.ts. Si no tienes ninguna targeta de crédito/débito en la página la puedes añadir aquí, y a la hora de pagar el bot la añadirá automáticamente y pagará con ella, pero no es requerida. Si no tienes una tarjeta en tu cuenta y no has añadido una en el bot, seleccionará por defecto el pago con transferencia.
 
 ```javascript
 const card: ICard = {
@@ -21,7 +33,6 @@ const card: ICard = {
 const app = new Bot({
   email: 'amador@mariscosrecio.com',
   password: 'yoquese',
-  phone: '+34612304123',
   card: card,
   link: 'https://www.pccomponentes.com/msi-rtx-3060-ti-ventus-2x-oc-8gb-gddr6',
   maxPrice: 440,
