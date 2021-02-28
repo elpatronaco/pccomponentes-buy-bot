@@ -122,7 +122,7 @@ export default class Bot {
 
     await page.goto('https://www.pccomponentes.com/cart/order', { waitUntil: 'networkidle2' })
 
-    const cardNameText = await page.$eval("span[class='h5 card-name']", el => el.textContent)
+    // const cardNameText = await page.$eval("span[class='h5 card-name']", el => el.textContent)
 
     const paymentMethods = await page.$$("input[name='metodoPago']")
 
@@ -141,7 +141,7 @@ export default class Bot {
       await paymentMethods[2].click()
     } */
 
-    console.warn('ADDING CARD BEING WORKED ON. SELECTED TRANSFER AS PAYMENT')
+    console.log('\x1b[33m%s\x1b[0m', 'ADDING CARD BEING WORKED ON. SELECTED TRANSFER AS PAYMENT')
     await paymentMethods[2].click()
 
     while (

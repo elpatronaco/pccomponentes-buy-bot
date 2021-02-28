@@ -1,14 +1,26 @@
 # PCComponentes buy bot
 
-A small buying bot made in node for pccomponentes.com so you can get the 3080 you're dying for. Since it finds stock till it buys there's an avg time of **10 seconds** because of Selenium limitations (while adding credit/debit card, without having to add it speeds up ≃ 2 seconds), but I'm working to take it down further (_This could be outdated because of changes on the website. Pull requests are welcome_)
+A small buying bot made in node for pccomponentes.com so you can get the 3080 you're dying for. (_This could be outdated because of changes on the website. Pull requests are welcome_)
 
 ### [en Español](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.es.md)
 
 ## How-to
 
-A few things are needed for the bot to work. Node installed and the chromedriver for the release of your chrome installation (you can install it from [here](https://chromedriver.chromium.org/getting-started))
+A few things are needed for the bot to work. [Node installed](https://nodejs.org/es/download/) and the [chromedriver](https://chromedriver.chromium.org/getting-started) for the exact release of your chrome installation.
 
-Install the node modules with the command `npm install` on the project folder. Then you need to edit the parameters in the index.ts file inside the src/ directory. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required. Also the script is able to send SMS to your phone with info about the process, if you don't want to, delete the phone from the parameters.
+Open the console and type
+
+```console
+cd [directory of the project, e.g /usr/app/ or C://app]
+```
+
+Then install the node modules with the command
+
+```console
+npm install
+```
+
+on the project folder. You need to edit the parameters in the index.ts file inside the src/ directory. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required. If you don't have a credit card in your account and you didn't provide one the bot will select bank transfer as default payment.
 
 ```javascript
 const card: ICard = {
@@ -21,7 +33,6 @@ const card: ICard = {
 const app = new Bot({
   email: 'amador@mariscosrecio.com',
   password: 'yoquese',
-  phone: '+34612304123',
   card: card,
   link: 'https://www.pccomponentes.com/msi-rtx-3060-ti-ventus-2x-oc-8gb-gddr6',
   maxPrice: 440,
