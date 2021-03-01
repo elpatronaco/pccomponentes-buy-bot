@@ -1,19 +1,18 @@
-import puppeteer, { Browser, Page } from 'puppeteer'
-import { ICard, IFrameContent, IItem, IProps } from './models'
+const puppeteer = require('puppeteer')
 
-export default class Bot {
+module.exports = class Bot {
   // class properties
-  email: string
-  password: string
-  items: IItem | Array<IItem>
-  card?: ICard
-  refreshRate?: number
-  phone?: string
-  debug: boolean
+  email
+  password
+  items
+  card
+  refreshRate
+  phone
+  debug
 
   // map props to class properties
-  constructor({ email, password, items, card, refreshRate, debug = false }: IProps) {
-    ;(this.email = email),
+  constructor({ email, password, items, card, refreshRate, debug = false }) {
+    ; (this.email = email),
       (this.password = password),
       (this.items = items),
       (this.card = card),
@@ -25,8 +24,8 @@ export default class Bot {
   async run() {
     try {
       // this creates a new chrome window
-      const browser: Browser = await puppeteer.launch({ headless: !this.debug })
-      let page: Page = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
+      const browser = await puppeteer.launch({ headless: !this.debug })
+      let page = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
 
       console.log(
         '\x1b[33m%s\x1b[0m',
@@ -52,7 +51,7 @@ export default class Bot {
     }
   }
 
-  async login(page: Page) {
+  async login(page) {
     await page
       .goto('https://www.pccomponentes.com/login', { waitUntil: 'networkidle2' })
       .then(async () => {
@@ -74,11 +73,11 @@ export default class Bot {
       })
   }
 
-  async runItem(page: Page, item: IItem) {
+  async runItem(page, item) {
     // navigates to the item link provided
-    let stock: boolean = false
-    let price: number | undefined
-    let name: string | undefined
+    let stock = false
+    let price
+    let name
 
     // waiting for stock loop
     while (!stock) {
@@ -172,15 +171,15 @@ export default class Bot {
     console.log('Attempting buy')
 
     while (page.url() === 'https://www.pccomponentes.com/cart/order') {
-      await page.$eval('#pccom-conditions', el => (el as HTMLElement).click())
+      await page.$eval('#pccom-conditions', el => el.click())
       if (!this.debug)
-        await page.$eval('#GTM-carrito-finalizarCompra', el => (el as HTMLElement).click())
+        await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
     }
 
     for (var i = 0; i < 50; i++) console.log('COMPRADO')
   }
 
-  async addCard(page: puppeteer.Page) {
+  async addCard(page) {
     // clicking add card button
     const addCard = await page.waitForSelector('#addNewCard')
 
@@ -189,20 +188,20 @@ export default class Bot {
 
     const cardFrames = await page.$$("iframe[class='js-iframe']")
 
-    const data: IFrameContent[] = [
+    const data = [
       {
         frame: cardFrames[0],
-        value: this.card!.num,
+        value: this.card.num,
         inputId: 'encryptedCardNumber'
       },
       {
         frame: cardFrames[1],
-        value: this.card!.expiryDate,
+        value: this.card.expiryDate,
         inputId: 'encryptedExpiryDate'
       },
       {
         frame: cardFrames[2],
-        value: this.card!.cvc,
+        value: this.card.cvc,
         inputId: 'encryptedSecurityCode'
       }
     ]
@@ -223,8 +222,8 @@ export default class Bot {
     else console.error('Save credit card button not found')
   }
 
-  async createHeadlessPage(browser: Browser): Promise<Page> {
-    const page: Page = await browser.newPage()
+  async createHeadlessPage(browser) {
+    const page = await browser.newPage()
 
     const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
     const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')

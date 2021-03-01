@@ -1,9 +1,8 @@
-import { ICard } from './models'
-import Bot from './app'
+const Bot = require('./app')
 
 // credit/debit card info. This is not required, if you don't provide it and you have no card on your account
 // it will select bank transfer as payment
-const card: ICard = {
+const card = {
   name: 'AMADOR RIVAS LOPEZ',
   num: '5137422665338597',
   expiryDate: '0421',
