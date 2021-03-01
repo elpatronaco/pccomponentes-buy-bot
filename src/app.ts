@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer'
+import puppeteer, { Browser, Page } from 'puppeteer'
 import { ICard, IFrameContent, IProps } from './models'
 
 export default class Bot {
@@ -27,9 +27,23 @@ export default class Bot {
   async run() {
     try {
       // this creates a new chrome window
-      const browser = await puppeteer.launch({ headless: false })
+      let browser: Browser
+      let page: Page
 
-      const page = await browser.newPage()
+      if (this.debug) {
+        browser = await puppeteer.launch({ headless: false })
+        page = await browser.newPage()
+      } else {
+        browser = await puppeteer.launch({ headless: true })
+        page = await browser.newPage()
+
+        const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
+        const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
+        await page.setUserAgent(chromeUserAgent)
+        await page.setExtraHTTPHeaders({
+          'accept-language': 'en-US,en;q=0.8'
+        })
+      }
 
       console.log(
         '\x1b[33m%s\x1b[0m',
@@ -45,7 +59,7 @@ export default class Bot {
     }
   }
 
-  async login(page: puppeteer.Page) {
+  async login(page: Page) {
     await page
       .goto('https://www.pccomponentes.com/login', { waitUntil: 'networkidle2' })
       .then(async () => {
@@ -67,7 +81,7 @@ export default class Bot {
       })
   }
 
-  async runItem(page: puppeteer.Page) {
+  async runItem(page: Page) {
     // navigates to the item link provided
     let stock: boolean = false
     let price: number | undefined
@@ -102,7 +116,7 @@ export default class Bot {
     }
   }
 
-  async buyItem(page: puppeteer.Page) {
+  async buyItem(page: Page) {
     const dataId = await page.evaluate(
       "document.getElementById('contenedor-principal').getAttribute('data-id')"
     )
@@ -154,6 +168,8 @@ export default class Bot {
       'PAGAR Y FINALIZAR'
     )
       await page.waitForTimeout(200)
+
+    console.log('Attempting buy')
 
     while (page.url() === 'https://www.pccomponentes.com/cart/order') {
       await page.$eval('#pccom-conditions', el => (el as HTMLElement).click())
