@@ -1,23 +1,21 @@
 import puppeteer, { Browser, Page } from 'puppeteer'
-import { ICard, IFrameContent, IProps } from './models'
+import { ICard, IFrameContent, IItem, IProps } from './models'
 
 export default class Bot {
   // class properties
   email: string
   password: string
-  link: string
-  maxPrice?: number
+  items: IItem | Array<IItem>
   card?: ICard
   refreshRate?: number
   phone?: string
   debug: boolean
 
   // map props to class properties
-  constructor({ email, password, link, maxPrice, card, refreshRate, debug = false }: IProps) {
+  constructor({ email, password, items, card, refreshRate, debug = false }: IProps) {
     ;(this.email = email),
       (this.password = password),
-      (this.link = link),
-      (this.maxPrice = maxPrice),
+      (this.items = items),
       (this.card = card),
       (this.refreshRate = refreshRate),
       (this.debug = debug)
@@ -51,8 +49,18 @@ export default class Bot {
       )
 
       await this.login(page)
-      await this.runItem(page)
-      await this.buyItem(page)
+
+      await page.close()
+
+      if (Array.isArray(this.items)) {
+        this.items.forEach(async item => {
+          const itemPage = await browser.newPage()
+          await this.runItem(itemPage, item)
+        })
+      } else {
+        const itemPage = await browser.newPage()
+        await this.runItem(itemPage, this.items)
+      }
     } catch (err) {
       console.error('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW')
       console.error(err)
@@ -81,14 +89,14 @@ export default class Bot {
       })
   }
 
-  async runItem(page: Page) {
+  async runItem(page: Page, item: IItem) {
     // navigates to the item link provided
     let stock: boolean = false
     let price: number | undefined
     while (!stock) {
       // this loop will play till stock is available, then to the next step
       await page.waitForTimeout(this.refreshRate || 5000)
-      await page.goto(this.link)
+      await page.goto(item.link)
       // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
       const buyButtons = await page.$('#btnsWishAddBuy')
       const notifyMeButton = await page.$('#notify-me')
@@ -99,13 +107,13 @@ export default class Bot {
         )
         if (priceAtt) price = Number(priceAtt)
         // checks if current price is below max price before continuing
-        if (!this.maxPrice || (this.maxPrice && price && price <= this.maxPrice)) {
+        if (!item.maxPrice || (item.maxPrice && price && price <= item.maxPrice)) {
           stock = true
           console.log(`PRODUCT IN STOCK! Starting buy process`)
         } else {
           console.log(
             price
-              ? `Price is above max. Max price set - ${this.maxPrice}€. Current price - ${price}€`
+              ? `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${price}€`
               : 'Price not found'
           )
         }
@@ -114,9 +122,7 @@ export default class Bot {
         console.log(`Product is not yet in stock (${new Date().toUTCString()})`)
       }
     }
-  }
 
-  async buyItem(page: Page) {
     const dataId = await page.evaluate(
       "document.getElementById('contenedor-principal').getAttribute('data-id')"
     )
