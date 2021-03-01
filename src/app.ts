@@ -27,9 +27,14 @@ export default class Bot {
   async run() {
     try {
       // this creates a new chrome window
-      const browser = await puppeteer.launch(this.debug ? { headless: false } : { headless: true })
+      const browser = await puppeteer.launch({ headless: false })
 
       const page = await browser.newPage()
+
+      console.log(
+        '\x1b[33m%s\x1b[0m',
+        "BOT CAN'T ADD CREDIT CARD YET. BANK TRANSFER WILL BE SELECTED"
+      )
 
       await this.login(page)
       await this.runItem(page)
