@@ -31,12 +31,27 @@ const card: ICard = {
 }
 
 const app = new Bot({
-  email: 'amador@mariscosrecio.com',
-  password: 'yoquese',
+  email: 'amador@gmail.com',
+  password: 'mariscosrecio',
   card: card,
-  link: 'https://www.pccomponentes.com/msi-rtx-3060-ti-ventus-2x-oc-8gb-gddr6',
-  maxPrice: 440,
-  refreshRate: 5000
+  // SI QUIERES VARIOS PRODUCTOS APÍLALOS EN UN ARRAY
+  items: [
+    {
+      link: 'https://www.pccomponentes.com/rtx-3060',
+      maxPrice: 3000
+    },
+    {
+      link: 'https://www.pccomponentes.com/rtx-3080-x-trio',
+      maxPrice: 1000
+    }
+  ],
+  // SI SÓLO QUIERES UNO
+  items: {
+    link: 'https://www.pccomponentes.com/rtx-3060',
+    maxPrice: 3000
+  },
+  refreshRate: 1000,
+  debug: false
 })
 
 app.run()

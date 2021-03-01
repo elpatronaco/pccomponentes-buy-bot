@@ -20,7 +20,7 @@ Then install the node modules with the command
 npm install
 ```
 
-on the project folder. You need to edit the parameters in the index.ts file inside the src/ directory. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required. If you don't have a credit card in your account and you didn't provide one the bot will select bank transfer as default payment.
+on the project folder. You need to edit the parameters in the index.ts file inside the src/ directory. You can set an array if you want to buy multiple items or only an item. Note that if you don't have a credit/debit card in your pccomponentes account you can add a card here so the bot will add it in the buying process, but it's not required. If you don't have a credit card in your account and you didn't provide one the bot will select bank transfer as default payment.
 
 ```javascript
 const card: ICard = {
@@ -31,12 +31,27 @@ const card: ICard = {
 }
 
 const app = new Bot({
-  email: 'amador@mariscosrecio.com',
-  password: 'yoquese',
+  email: 'amador@gmail.com',
+  password: 'mariscosrecio',
   card: card,
-  link: 'https://www.pccomponentes.com/msi-rtx-3060-ti-ventus-2x-oc-8gb-gddr6',
-  maxPrice: 440,
-  refreshRate: 5000
+  // IF YOU WANT MULTIPLE ITEMS SET AN ARRAY
+  items: [
+    {
+      link: 'https://www.pccomponentes.com/rtx-3060',
+      maxPrice: 3000
+    },
+    {
+      link: 'https://www.pccomponentes.com/rtx-3080-x-trio',
+      maxPrice: 1000
+    }
+  ],
+  // IF YOU ONLY WANT AN ITEM DO IT LIKE THIS
+  items: {
+    link: 'https://www.pccomponentes.com/rtx-3060',
+    maxPrice: 3000
+  },
+  refreshRate: 1000,
+  debug: false
 })
 
 app.run()

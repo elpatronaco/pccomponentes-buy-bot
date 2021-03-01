@@ -25,23 +25,8 @@ export default class Bot {
   async run() {
     try {
       // this creates a new chrome window
-      let browser: Browser
-      let page: Page
-
-      if (this.debug) {
-        browser = await puppeteer.launch({ headless: false })
-        page = await browser.newPage()
-      } else {
-        browser = await puppeteer.launch({ headless: true })
-        page = await browser.newPage()
-
-        const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
-        const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
-        await page.setUserAgent(chromeUserAgent)
-        await page.setExtraHTTPHeaders({
-          'accept-language': 'en-US,en;q=0.8'
-        })
-      }
+      const browser: Browser = await puppeteer.launch({ headless: !this.debug })
+      let page: Page = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
 
       console.log(
         '\x1b[33m%s\x1b[0m',
@@ -54,11 +39,11 @@ export default class Bot {
 
       if (Array.isArray(this.items)) {
         this.items.forEach(async item => {
-          const itemPage = await browser.newPage()
+          const itemPage = await this.createHeadlessPage(browser)
           await this.runItem(itemPage, item)
         })
       } else {
-        const itemPage = await browser.newPage()
+        const itemPage = await this.createHeadlessPage(browser)
         await this.runItem(itemPage, this.items)
       }
     } catch (err) {
@@ -93,6 +78,9 @@ export default class Bot {
     // navigates to the item link provided
     let stock: boolean = false
     let price: number | undefined
+    let name: string | undefined
+
+    // waiting for stock loop
     while (!stock) {
       // this loop will play till stock is available, then to the next step
       await page.waitForTimeout(this.refreshRate || 5000)
@@ -100,6 +88,11 @@ export default class Bot {
       // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
       const buyButtons = await page.$('#btnsWishAddBuy')
       const notifyMeButton = await page.$('#notify-me')
+
+      if (!name)
+        name = await page.evaluate(
+          `document.querySelector("div[class='ficha-producto__encabezado white-card-movil']").querySelector(".articulo").querySelector(".h4").querySelector("strong").textContent`
+        )
 
       if (buyButtons !== null && notifyMeButton === null) {
         const priceAtt = await page.evaluate(
@@ -109,7 +102,7 @@ export default class Bot {
         // checks if current price is below max price before continuing
         if (!item.maxPrice || (item.maxPrice && price && price <= item.maxPrice)) {
           stock = true
-          console.log(`PRODUCT IN STOCK! Starting buy process`)
+          console.log(`PRODUCT ${name && name} IN STOCK! Starting buy process`)
         } else {
           console.log(
             price
@@ -119,10 +112,11 @@ export default class Bot {
         }
       } else {
         // Else, proceeds to check the price and compare it to the maximum price if provided
-        console.log(`Product is not yet in stock (${new Date().toUTCString()})`)
+        console.log(`Product ${name && name} is not yet in stock (${new Date().toUTCString()})`)
       }
     }
 
+    // buys product
     const dataId = await page.evaluate(
       "document.getElementById('contenedor-principal').getAttribute('data-id')"
     )
@@ -227,5 +221,18 @@ export default class Bot {
 
     if (saveCardButton) await saveCardButton.click()
     else console.error('Save credit card button not found')
+  }
+
+  async createHeadlessPage(browser: Browser): Promise<Page> {
+    const page: Page = await browser.newPage()
+
+    const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
+    const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
+    await page.setUserAgent(chromeUserAgent)
+    await page.setExtraHTTPHeaders({
+      'accept-language': 'en-US,en;q=0.8'
+    })
+
+    return page
   }
 }
