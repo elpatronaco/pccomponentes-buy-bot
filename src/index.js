@@ -14,19 +14,19 @@ const app = new Bot({
   email: 'amador@gmail.com',
   password: 'mariscosrecio',
   card: card,
-  items: [
-    {
+  items:
+    [{
       link:
-        'https://www.pccomponentes.com/pccom-platinum-amd-ryzen-7-5800x-32gb-1tbssd-2tb-rx6800xt?gclid=Cj0KCQiA-OeBBhDiARIsADyBcE463GmlK4t8G5t-HQ7epqQxe0S1ftyPFO1zE7C8jT5zlxWDKJ_5SAoaArnnEALw_wcB&',
+        'https://www.pccomponentes.com/pccom-bronze-sp-intel-core-i5-9400f-8gb-480gbssd-gtx1050ti',
       maxPrice: 3000
     },
     {
-      link: 'https://www.pccomponentes.com/gigabyte-geforce-rtx-3070-gaming-oc-8gb-gddr6',
-      maxPrice: 1000
-    }
-  ],
+      link: "https://www.pccomponentes.com/evga-geforce-rtx-3060-ti-xc-8gb-gddr6-reacondicionado",
+      maxPrice: 4000
+    }]
+  ,
   refreshRate: 1000, // rate in milliseconds that the bot will refresh the page till stock is available. Default: 1000 milliseconds (1 second)
-  debug: false
+  debug: false // SHOULD BE FALSE
 })
 
 app.run()

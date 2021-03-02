@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer')
+const chalk = require("chalk")
+const log = console.log
 
 module.exports = class Bot {
   // class properties
@@ -27,27 +29,22 @@ module.exports = class Bot {
       const browser = await puppeteer.launch({ headless: !this.debug })
       let page = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
 
-      console.log(
-        '\x1b[33m%s\x1b[0m',
-        "BOT CAN'T ADD CREDIT CARD YET. BANK TRANSFER WILL BE SELECTED"
-      )
+      log(chalk.bgYellow.black("BOT CAN'T ADD CREDIT CARD YET. BANK TRANSFER WILL BE SELECTED"))
 
       await this.login(page)
 
       await page.close()
 
       if (Array.isArray(this.items)) {
-        this.items.forEach(async item => {
-          const itemPage = await this.createHeadlessPage(browser)
-          await this.runItem(itemPage, item)
-        })
+        this.items.forEach(item =>
+          this.runItemInstance(browser, item)
+        )
       } else {
-        const itemPage = await this.createHeadlessPage(browser)
-        await this.runItem(itemPage, this.items)
+        await this.runItemInstance(browser, this.items)
       }
     } catch (err) {
-      console.error('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW')
-      console.error(err)
+      log(chalk.red('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW'))
+      log(chalk.whiteBright(err))
     }
   }
 
@@ -69,7 +66,7 @@ module.exports = class Bot {
         // checks if logged in
         if (!(page.url() == 'https://www.pccomponentes.com/'))
           throw Error(`ERROR: Login to account with email ${this.email} failed`)
-        console.log(`Successfully logged in as ${this.email}`)
+        log(chalk.greenBright(`Successfully logged in as ${this.email}`))
       })
   }
 
@@ -101,17 +98,17 @@ module.exports = class Bot {
         // checks if current price is below max price before continuing
         if (!item.maxPrice || (item.maxPrice && price && price <= item.maxPrice)) {
           stock = true
-          console.log(`PRODUCT ${name && name} IN STOCK! Starting buy process`)
+          log(chalk(`PRODUCT ${name && chalk.bold(name)} ${chalk.cyan("IN STOCK!")} Starting buy process`))
         } else {
-          console.log(
+          log(chalk.red(
             price
               ? `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${price}€`
               : 'Price not found'
-          )
+          ))
         }
       } else {
         // Else, proceeds to check the price and compare it to the maximum price if provided
-        console.log(`Product ${name && name} is not yet in stock (${new Date().toUTCString()})`)
+        log(chalk(`Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`))
       }
     }
 
@@ -124,7 +121,7 @@ module.exports = class Bot {
         waitUntil: 'networkidle2'
       })
     else {
-      console.log('Not found product id. Forcing click of all buy buttons')
+      log('Not found product id. Forcing click of all buy buttons')
       const buyButtons = await page.$$('.buy-button')
       let clickedButton = false
       buyButtons.forEach(async buyButton => {
@@ -133,16 +130,16 @@ module.exports = class Bot {
             await buyButton.click()
             clickedButton = true
           } catch {
-            console.log('Buy button not found, attempting another one...')
+            log('Buy button not found, attempting another one...')
           }
       })
     }
 
     await page.goto('https://www.pccomponentes.com/cart/order', { waitUntil: 'networkidle2' })
 
-    // const cardNameText = await page.$eval("span[class='h5 card-name']", el => el.textContent)
+    // const paymentMethods = await page.$$("input[name='metodoPago']")
 
-    const paymentMethods = await page.$$("input[name='metodoPago']")
+    // const cardNameText = await page.$eval("span[class='h5 card-name']", el => el.textContent)
 
     // FIXME: checks if the account has an added card, if not it adds the provided one
     /* if (this.card && cardNameText && cardNameText === 'Nombre aquí') {
@@ -159,8 +156,10 @@ module.exports = class Bot {
       await paymentMethods[2].click()
     } */
 
-    console.log('\x1b[33m%s\x1b[0m', 'ADDING CARD BEING WORKED ON. SELECTED TRANSFER AS PAYMENT')
-    await paymentMethods[2].click()
+    // TEMPORARY
+    log(chalk.bgYellow.black('ADDING CARD BEING WORKED ON. SELECTING TRANSFER AS PAYMENT'))
+    const bankTransfer = await page.$("input[data-payment-name='Transferencia ordinaria']")
+    await bankTransfer.click()
 
     while (
       (await page.$eval('#GTM-carrito-finalizarCompra', el => el.textContent)) !==
@@ -168,15 +167,26 @@ module.exports = class Bot {
     )
       await page.waitForTimeout(200)
 
-    console.log('Attempting buy')
+    log('Attempting buy')
 
-    while (page.url() === 'https://www.pccomponentes.com/cart/order') {
-      await page.$eval('#pccom-conditions', el => el.click())
-      if (!this.debug)
-        await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+    let attempting = true
+
+    setTimeout(() => attempting = false, 15000)
+
+    while (page.url() === 'https://www.pccomponentes.com/cart/order' && attempting) {
+      if (attempting)
+        try {
+          await page.$eval('#pccom-conditions', el => el.click())
+          if (!this.debug)
+            await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+        } catch {
+          attempting = false
+        }
     }
 
-    for (var i = 0; i < 50; i++) console.log('COMPRADO')
+    await page.waitForTimeout(5000)
+
+    return page.url().includes("pccomponentes.com/cart/order/finished/ok")
   }
 
   async addCard(page) {
@@ -184,7 +194,7 @@ module.exports = class Bot {
     const addCard = await page.waitForSelector('#addNewCard')
 
     if (addCard) await addCard.click()
-    else console.error("Didn't find add card button")
+    else log(chalk.redBright("Didn't find add card button"))
 
     const cardFrames = await page.$$("iframe[class='js-iframe']")
 
@@ -211,7 +221,7 @@ module.exports = class Bot {
       if (input) {
         await input.focus()
         await page.keyboard.type(d.value)
-      } else console.error(`Inputbox of credit card with id ${d.inputId} not found`)
+      } else log(chalk.redBright(`Inputbox of credit card with id ${d.inputId} not found`))
     })
 
     const saveCardButton = await page.waitForSelector(
@@ -219,7 +229,7 @@ module.exports = class Bot {
     )
 
     if (saveCardButton) await saveCardButton.click()
-    else console.error('Save credit card button not found')
+    else log(chalk.redBright('Save credit card button not found'))
   }
 
   async createHeadlessPage(browser) {
@@ -233,5 +243,20 @@ module.exports = class Bot {
     })
 
     return page
+  }
+
+  async runItemInstance(browser, item) {
+    let attempting = true
+    do {
+      const itemPage = await this.createHeadlessPage(browser)
+      const result = await this.runItem(itemPage, item)
+      await itemPage.close()
+      if (result) {
+        attempting = false
+        for (var i = 0; i < 20; i++) log(chalk.greenBright("COMPRADO"))
+      }
+      else
+        log(chalk.hex("#ffa500").italic("ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK"))
+    } while (attempting)
   }
 }
