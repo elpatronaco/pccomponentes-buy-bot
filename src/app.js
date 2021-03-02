@@ -24,6 +24,8 @@ module.exports = class Bot {
   // main method
   async run() {
     try {
+      this.checkParams()
+
       // this creates a new chrome window
       const browser = await puppeteer.launch({ headless: !this.debug })
       let page = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
@@ -282,9 +284,7 @@ module.exports = class Bot {
       )
     ) {
       log(
-        chalk.bgRedBright(
-          'One parameter or many is/are incorrect, compare them with the ones on github'
-        )
+        chalk.bgRed('One parameter or many is/are incorrect, compare them with the ones on github')
       )
       process.exit(1)
     }
