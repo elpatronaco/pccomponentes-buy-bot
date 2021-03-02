@@ -1,5 +1,5 @@
-const Bot = require('./app')
-const data = require("./data.json")
+const Bot = require('./scripts/app')
+const data = require('./data.json')
 
 const app = new Bot({ ...data })
 

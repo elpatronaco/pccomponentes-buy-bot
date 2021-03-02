@@ -1,16 +1,16 @@
-const puppeteer = require('puppeteer')
+const chalk = require('chalk')
 
-module.exports = async (page, item, props) => {
-  // navigates to the item link provided
+const log = console.log
+const data = require('../../data.json')
+
+module.exports = async (page, { link, maxPrice }) => {
   let stock = false
   let price
   let name
 
-  // waiting for stock loop
+  // this loop will play till stock is available, then to the next step
   while (!stock) {
-    // this loop will play till stock is available, then to the next step
-    await page.waitForTimeout(this.refreshRate)
-    await page.goto(item.link)
+    await page.goto(link, { waitUntil: 'networkidle2' })
     // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
     const buyButtons = await page.$('#btnsWishAddBuy')
     const notifyMeButton = await page.$('#notify-me')
@@ -26,7 +26,7 @@ module.exports = async (page, item, props) => {
       )
       if (priceAtt) price = Number(priceAtt)
       // checks if current price is below max price before continuing
-      if (!item.maxPrice || (item.maxPrice && price && price <= item.maxPrice)) {
+      if (!maxPrice || (maxPrice && price && price <= maxPrice)) {
         stock = true
         log(
           chalk(
@@ -37,7 +37,7 @@ module.exports = async (page, item, props) => {
         log(
           chalk.red(
             price
-              ? `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${price}€`
+              ? `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
               : 'Price not found'
           )
         )
@@ -49,6 +49,8 @@ module.exports = async (page, item, props) => {
           `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
         )
       )
+
+      await page.waitForTimeout(data.refreshRate ?? 1000)
     }
   }
 
@@ -86,7 +88,7 @@ module.exports = async (page, item, props) => {
   )
     await page.waitForTimeout(200)
 
-  log(chalk.bold('Attempting buy'))
+  log(chalk.green("Attempting buy of " + chalk.bold(name)))
 
   let attempting = true
 
@@ -95,7 +97,7 @@ module.exports = async (page, item, props) => {
   while (page.url() === 'https://www.pccomponentes.com/cart/order' && attempting) {
     try {
       await page.$eval('#pccom-conditions', el => el.click())
-      if (!this.debug) await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+      if (!data.debug) await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
     } catch {
       attempting = false
     }
