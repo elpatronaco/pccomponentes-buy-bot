@@ -184,13 +184,13 @@ module.exports = class Bot {
     setTimeout(() => (attempting = false), 15000)
 
     while (page.url() === 'https://www.pccomponentes.com/cart/order' && attempting) {
-      if (attempting)
-        try {
-          await page.$eval('#pccom-conditions', el => el.click())
-          if (!this.debug) await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
-        } catch {
-          attempting = false
-        }
+      try {
+        await page.$eval('#pccom-conditions', el => el.click())
+        if (!this.debug) await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+      } catch {
+        attempting = false
+      }
+      await page.waitForTimeout(50)
     }
 
     await page.waitForTimeout(5000)
