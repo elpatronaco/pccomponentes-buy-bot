@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer')
-const chalk = require("chalk")
+const chalk = require('chalk')
 const log = console.log
 
 module.exports = class Bot {
@@ -9,12 +9,11 @@ module.exports = class Bot {
   items
   card
   refreshRate
-  phone
   debug
 
   // map props to class properties
-  constructor({ email, password, items, card, refreshRate, debug = false }) {
-    ; (this.email = email),
+  constructor({ email, password, items, card, refreshRate = 1000, debug = false }) {
+    ;(this.email = email),
       (this.password = password),
       (this.items = items),
       (this.card = card),
@@ -36,9 +35,7 @@ module.exports = class Bot {
       await page.close()
 
       if (Array.isArray(this.items)) {
-        this.items.forEach(item =>
-          this.runItemInstance(browser, item)
-        )
+        this.items.forEach(item => this.runItemInstance(browser, item))
       } else {
         await this.runItemInstance(browser, this.items)
       }
@@ -80,7 +77,7 @@ module.exports = class Bot {
     // waiting for stock loop
     while (!stock) {
       // this loop will play till stock is available, then to the next step
-      await page.waitForTimeout(this.refreshRate || 5000)
+      await page.waitForTimeout(this.refreshRate)
       await page.goto(item.link)
       // when item is not in stock, the button that informs you that there's no stock has the id 'notify-me'. If it's found there's not stock.
       const buyButtons = await page.$('#btnsWishAddBuy')
@@ -99,17 +96,27 @@ module.exports = class Bot {
         // checks if current price is below max price before continuing
         if (!item.maxPrice || (item.maxPrice && price && price <= item.maxPrice)) {
           stock = true
-          log(chalk(`PRODUCT ${name && chalk.bold(name)} ${chalk.cyan("IN STOCK!")} Starting buy process`))
+          log(
+            chalk(
+              `PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`
+            )
+          )
         } else {
-          log(chalk.red(
-            price
-              ? `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${price}€`
-              : 'Price not found'
-          ))
+          log(
+            chalk.red(
+              price
+                ? `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${price}€`
+                : 'Price not found'
+            )
+          )
         }
       } else {
         // Else, proceeds to check the price and compare it to the maximum price if provided
-        log(chalk(`Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`))
+        log(
+          chalk(
+            `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
+          )
+        )
       }
     }
 
@@ -168,18 +175,17 @@ module.exports = class Bot {
     )
       await page.waitForTimeout(200)
 
-    log('Attempting buy')
+    log(chalk.bold('Attempting buy'))
 
     let attempting = true
 
-    setTimeout(() => attempting = false, 15000)
+    setTimeout(() => (attempting = false), 15000)
 
     while (page.url() === 'https://www.pccomponentes.com/cart/order' && attempting) {
       if (attempting)
         try {
           await page.$eval('#pccom-conditions', el => el.click())
-          if (!this.debug)
-            await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+          if (!this.debug) await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
         } catch {
           attempting = false
         }
@@ -187,7 +193,7 @@ module.exports = class Bot {
 
     await page.waitForTimeout(5000)
 
-    return page.url().includes("pccomponentes.com/cart/order/finished/ok")
+    return page.url().includes('pccomponentes.com/cart/order/finished/ok')
   }
 
   async addCard(page) {
@@ -254,10 +260,33 @@ module.exports = class Bot {
       await itemPage.close()
       if (result) {
         attempting = false
-        for (var i = 0; i < 20; i++) log(chalk.greenBright("COMPRADO"))
-      }
-      else
-        log(chalk.hex("#ffa500").italic("ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK"))
+        for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+      } else
+        log(
+          chalk
+            .hex('#ffa500')
+            .italic('ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK')
+        )
     } while (attempting)
+  }
+
+  checkParams() {
+    if (
+      !(
+        this.items &&
+        typeof this.email === 'string' &&
+        this.password &&
+        typeof this.password === 'string' &&
+        this.items &&
+        (Array.isArray(this.items) || typeof this.items === 'object')
+      )
+    ) {
+      log(
+        chalk.bgRedBright(
+          'One parameter or many is/are incorrect, compare them with the ones on github'
+        )
+      )
+      process.exit(1)
+    }
   }
 }
