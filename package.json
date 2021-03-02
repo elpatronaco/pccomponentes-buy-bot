@@ -4,7 +4,8 @@
   "description": "A bot that waits for a selected product to be in stock and then buys it",
   "main": "./src/index.js",
   "scripts": {
-    "start": "node src"
+    "start": "node src",
+    "pretttier": "prettier -w src"
   },
   "repository": {
     "type": "git",

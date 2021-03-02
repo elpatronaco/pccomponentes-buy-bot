@@ -1,0 +1,16 @@
+{
+  "email": "amador@gmail.com",
+  "password": "mariscosrecio",
+  "items": [
+    {
+      "link": "https://www.pccomponentes.com/pccom-bronze-sp-intel-core-i5-9400f-8gb-480gbssd-gtx1050ti",
+      "maxPrice": 3000
+    },
+    {
+      "link": "https://www.pccomponentes.com/evga-geforce-rtx-3060-ti-xc-8gb-gddr6-reacondicionado",
+      "maxPrice": 4000
+    }
+  ],
+  "refreshRate": 1000,
+  "debug": false
+}
