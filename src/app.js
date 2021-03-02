@@ -62,11 +62,12 @@ module.exports = class Bot {
           await page.keyboard.type(this.password.trim())
           await page.keyboard.press('Enter')
         })
-        await page.waitForNavigation({ waitUntil: 'networkidle2' })
+        await page.waitForTimeout(8000)
         // checks if logged in
-        if (!(page.url() == 'https://www.pccomponentes.com/'))
-          throw Error(`ERROR: Login to account with email ${this.email} failed`)
-        log(chalk.greenBright(`Successfully logged in as ${this.email}`))
+        if (!(page.url() == 'https://www.pccomponentes.com/')) {
+          log(chalk.redBright(`Login to account with email ${this.email} failed`))
+          process.exit(1)
+        } else log(chalk.greenBright(`Successfully logged in as ${this.email}`))
       })
   }
 
