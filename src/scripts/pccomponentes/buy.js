@@ -79,7 +79,7 @@ module.exports = async (page, { link, maxPrice }) => {
 
   await page.goto('https://www.pccomponentes.com/cart/order', { waitUntil: 'networkidle2' })
 
-  log(chalk.bgYellow.black('ADDING CARD BEING WORKED ON. SELECTING TRANSFER AS PAYMENT'))
+  log(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
   const bankTransfer = await page.$("input[data-payment-name='Transferencia ordinaria']")
   await bankTransfer.click()
 
@@ -88,7 +88,7 @@ module.exports = async (page, { link, maxPrice }) => {
   )
     await page.waitForTimeout(200)
 
-  log(chalk.green("Attempting buy of " + chalk.bold(name)))
+  log(chalk.green('Attempting buy of ' + chalk.bold(name)))
 
   let attempting = true
 

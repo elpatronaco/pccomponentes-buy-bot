@@ -4,8 +4,18 @@
     "password": "mariscosrecio",
     "items": [
       {
-        "link": "https://www.pccomponentes.com/msi-mag-forge-100r-cristal-templado-usb-32-rgb",
-        "maxPrice": 4000
+        "link": "https://www.pccomponentes.com/xiaomi-mi-computer-monitor-light-bar?gclid=Cj0KCQiAhP2BBhDdARIsAJEzXlFGPt39wcTtyjo0deaBkYmMFp7w0uHrSrSwFlMSCJzVJIUCZZYrQs0aAvfzEALw_wcB&",
+        "maxPrice": 3000
+      }
+    ]
+  },
+  "coolmod": {
+    "email": "amador@gmail.com",
+    "password": "mariscosrecio",
+    "items": [
+      {
+        "link": "https://www.ldlc.com/es-es/ficha/PB00410146.html",
+        "maxPrice": 3000
       }
     ]
   },
@@ -14,12 +24,12 @@
     "password": "mariscosrecio",
     "items": [
       {
-        "link": "https://www.ldlc.com/es-es/ficha/PB00408690.html?offerId=AR202102220015",
+        "link": "https://www.coolmod.com/gigabyte-g32qc-32-gaming-165hz-2k-freesync-g-sync-compatible-curvo-monitor-precio",
         "maxPrice": 3000
       }
     ]
   },
-  "debug": true,
+  "debug": false,
   "refreshRate": 1000,
   "browserOptions": {
     "headless": {

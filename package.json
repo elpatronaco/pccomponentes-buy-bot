@@ -1,6 +1,8 @@
 {
   "name": "pccomponentes-buy-bot",
   "version": "1.0.0",
+  "author": "elPatron",
+  "license": "MIT",
   "description": "A bot that waits for a selected product to be in stock and then buys it",
   "main": "./src/index.js",
   "scripts": {
@@ -15,8 +17,6 @@
     "pccomponentes",
     "bot"
   ],
-  "author": "Pau Colome",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/elpatronaco/pccomponentes-buy-bot/issues"
   },

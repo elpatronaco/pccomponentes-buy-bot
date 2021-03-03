@@ -9,16 +9,24 @@ const pcc = require('./pccomponentes/buy')
 const ldlcLogin = require('./ldlc/login')
 const ldlc = require('./ldlc/buy')
 
+const coolmodLogin = require('./coolmod/login')
+const coolmod = require('./coolmod/buy')
+
 module.exports = class Bot {
   // class properties
   pccomponentes
   ldlc
+  coolmod
   debug
   browserOptions
 
   // map props to class properties
-  constructor({ pccomponentes, ldlc, debug = false, browserOptions }) {
-    ; (this.pccomponentes = pccomponentes), (this.ldlc = ldlc), (this.debug = debug), (this.browserOptions = browserOptions)
+  constructor({ pccomponentes, ldlc, coolmod, debug = false, browserOptions }) {
+    ;(this.pccomponentes = pccomponentes),
+      (this.ldlc = ldlc),
+      (this.coolmod = coolmod),
+      (this.debug = debug),
+      (this.browserOptions = browserOptions)
   }
 
   // main method
@@ -27,16 +35,27 @@ module.exports = class Bot {
       this.checkParams()
 
       // this creates a new chrome window
-      const browser = await puppeteer.launch(this.debug ? this.browserOptions.debug : this.browserOptions.headless)
-      let loginPage = this.debug ? await browser.newPage() : await this.createHeadlessPage(browser)
-
-      log(chalk.bgYellow.black("BOT CAN'T ADD CREDIT CARD YET ON PCCOMPONENTES. BANK TRANSFER WILL BE SELECTED"))
+      const browser = await puppeteer.launch(
+        this.debug ? this.browserOptions.debug : this.browserOptions.headless
+      )
+      const loginPage = this.debug
+        ? await browser.newPage()
+        : await this.createHeadlessPage(browser)
 
       if (this.pccomponentes)
-        await pccLogin(loginPage, { email: this.pccomponentes.email, password: this.pccomponentes.password })
+        await pccLogin(loginPage, {
+          email: this.pccomponentes.email,
+          password: this.pccomponentes.password
+        })
 
       if (this.ldlc)
         await ldlcLogin(loginPage, { email: this.ldlc.email, password: this.ldlc.password })
+
+      if (this.coolmod)
+        await coolmodLogin(loginPage, {
+          email: this.coolmod.email,
+          password: this.coolmod.password
+        })
 
       await loginPage.close()
 
@@ -52,6 +71,13 @@ module.exports = class Bot {
           this.ldlc.items.forEach(item => this.runItemInstance(browser, ldlc, item))
         } else {
           await this.runItemInstance(browser, ldlc, this.ldlc.items)
+        }
+
+      if (this.coolmod)
+        if (Array.isArray(this.coolmod.items)) {
+          this.coolmod.items.forEach(item => this.runItemInstance(browser, coolmod, item))
+        } else {
+          await this.runItemInstance(browser, coolmod, this.coolmod.items)
         }
     } catch (err) {
       log(chalk.red('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW'))
@@ -78,19 +104,20 @@ module.exports = class Bot {
   }
 
   checkParams() {
-    if (
-      !(
-        this.pccomponentes &&
-        this.pccomponentes.items &&
-        typeof this.pccomponentes.email === 'string' &&
-        this.pccomponentes.password &&
-        typeof this.pccomponentes.password === 'string' &&
-        this.pccomponentes.items &&
-        (Array.isArray(this.pccomponentes.items) || typeof this.pccomponentes.items === 'object')
-      )
-    ) {
+    const check = store =>
+      store &&
+      store.items &&
+      typeof store.email === 'string' &&
+      store.password &&
+      typeof store.password === 'string' &&
+      store.items &&
+      (Array.isArray(store.items) || typeof store.items === 'object')
+
+    if (!(check(this.pccomponentes) || check(this.ldlc) || check(this.coolmod))) {
       log(
-        chalk.bgRed('One parameter or many is/are incorrect, compare them with the ones on github')
+        chalk.bgRed(
+          'One parameter or many in file data.json is/are incorrect, compare them with the ones on github'
+        )
       )
       process.exit(1)
     }
