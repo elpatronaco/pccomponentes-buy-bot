@@ -11,11 +11,11 @@ module.exports = async (page, { email, password }) => {
     .then(async () => {
       // fills the form and logs in
       await page.$('#Email').then(async value => {
-        await value?.focus()
+        await value.focus()
         await page.keyboard.type(email.trim())
       })
       await page.$('#Password').then(async value => {
-        await value?.focus()
+        await value.focus()
         await page.keyboard.type(password.trim())
         await page.keyboard.press('Enter')
       })
