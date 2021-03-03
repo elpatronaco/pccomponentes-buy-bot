@@ -28,7 +28,7 @@ module.exports = async (page, { link, maxPrice }) => {
           `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
         )
       )
-      await page.waitForTimeout(data.refreshRate ?? 1000)
+      await page.waitForTimeout(data.refreshRate || 1000)
     }
   }
 

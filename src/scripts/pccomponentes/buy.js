@@ -50,7 +50,7 @@ module.exports = async (page, { link, maxPrice }) => {
         )
       )
 
-      await page.waitForTimeout(data.refreshRate ?? 1000)
+      await page.waitForTimeout(data.refreshRate || 1000)
     }
   }
 
