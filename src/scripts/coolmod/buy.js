@@ -74,8 +74,7 @@ module.exports = async (page, { link, maxPrice }) => {
 
   await page.waitForTimeout(1000)
 
-  if (!data.debug)
-    await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
+  if (!data.debug) await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
 
   await page.waitForTimeout(6000)
 

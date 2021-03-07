@@ -19,7 +19,7 @@ module.exports = async (page, { email, password }) => {
         await value.focus()
         await page.keyboard.type(password.trim())
       })
-      await page.evaluate("document.querySelector(\"input[type='submit']\").click()")
+      await page.evaluate('document.querySelector("input[type=\'submit\']").click()')
       await page.waitForTimeout(8000)
 
       const emailInput = await page.$("input[name='username']")

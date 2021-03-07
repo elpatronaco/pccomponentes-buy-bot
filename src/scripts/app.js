@@ -2,15 +2,11 @@ const puppeteer = require('puppeteer')
 const chalk = require('chalk')
 const log = console.log
 
-// scripts
-const pccLogin = require('./pccomponentes/login')
-const pcc = require('./pccomponentes/buy')
-
-const ldlcLogin = require('./ldlc/login')
-const ldlc = require('./ldlc/buy')
-
-const coolmodLogin = require('./coolmod/login')
-const coolmod = require('./coolmod/buy')
+Array.prototype.forEachAsync = async function (fn) {
+  for (let t of this) {
+    await fn(t)
+  }
+}
 
 module.exports = class Bot {
   // class properties
@@ -38,47 +34,47 @@ module.exports = class Bot {
       const browser = await puppeteer.launch(
         this.debug ? this.browserOptions.debug : this.browserOptions.headless
       )
+
+      const stores = [
+        {
+          data: this.pccomponentes,
+          buy: require('./pccomponentes/buy'),
+          login: require('./pccomponentes/login')
+        },
+        {
+          data: this.ldlc,
+          buy: require('./ldlc/buy'),
+          login: require('./ldlc/login')
+        },
+        {
+          data: this.coolmod,
+          buy: require('./coolmod/buy'),
+          login: require('./coolmod/login')
+        }
+      ]
+
       const loginPage = this.debug
         ? await browser.newPage()
         : await this.createHeadlessPage(browser)
 
-      if (this.pccomponentes)
-        await pccLogin(loginPage, {
-          email: this.pccomponentes.email,
-          password: this.pccomponentes.password
-        })
-
-      if (this.ldlc)
-        await ldlcLogin(loginPage, { email: this.ldlc.email, password: this.ldlc.password })
-
-      if (this.coolmod)
-        await coolmodLogin(loginPage, {
-          email: this.coolmod.email,
-          password: this.coolmod.password
-        })
+      await stores.forEachAsync(async store => {
+        if (store.data)
+          await store.login(loginPage, {
+            email: store.data.email,
+            password: store.data.password
+          })
+      })
 
       await loginPage.close()
 
-      if (this.pccomponentes)
-        if (Array.isArray(this.pccomponentes.items)) {
-          this.pccomponentes.items.forEach(item => this.runItemInstance(browser, pcc, item))
-        } else {
-          await this.runItemInstance(browser, pcc, this.pccomponentes.items)
-        }
-
-      if (this.ldlc)
-        if (Array.isArray(this.ldlc.items)) {
-          this.ldlc.items.forEach(item => this.runItemInstance(browser, ldlc, item))
-        } else {
-          await this.runItemInstance(browser, ldlc, this.ldlc.items)
-        }
-
-      if (this.coolmod)
-        if (Array.isArray(this.coolmod.items)) {
-          this.coolmod.items.forEach(item => this.runItemInstance(browser, coolmod, item))
-        } else {
-          await this.runItemInstance(browser, coolmod, this.coolmod.items)
-        }
+      await stores.forEachAsync(async store => {
+        if (store.data)
+          if (Array.isArray(store.data.items)) {
+            store.data.items.forEach(item => this.runItemInstance(browser, store.buy, item))
+          } else {
+            await this.runItemInstance(browser, store.buy, store.data.items)
+          }
+      })
     } catch (err) {
       log(chalk.red('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW'))
       log(chalk.whiteBright(err))
@@ -107,6 +103,7 @@ module.exports = class Bot {
     const check = store =>
       store &&
       store.items &&
+      store.email &&
       typeof store.email === 'string' &&
       store.password &&
       typeof store.password === 'string' &&
