@@ -18,7 +18,7 @@ module.exports = class Bot {
 
   // map props to class properties
   constructor({ pccomponentes, ldlc, coolmod, debug = false, browserOptions }) {
-    ;(this.pccomponentes = pccomponentes),
+    ; (this.pccomponentes = pccomponentes),
       (this.ldlc = ldlc),
       (this.coolmod = coolmod),
       (this.debug = debug),
@@ -85,12 +85,16 @@ module.exports = class Bot {
     let attempting = true
     do {
       const itemPage = await this.createHeadlessPage(browser)
-      const result = await script(itemPage, item)
+
+      try {
+        attempting = !(await script(itemPage, item))
+      } catch (err) {
+        log(chalk.bgRedBright.white(err))
+      }
       await itemPage.close()
-      if (result) {
-        attempting = false
+      if (!attempting)
         for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
-      } else
+      else
         log(
           chalk
             .hex('#ffa500')
