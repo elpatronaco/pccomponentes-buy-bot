@@ -18,10 +18,21 @@ module.exports = async (page, { link, maxPrice }) => {
     const outOfStockSpan = await page.$("div[class='modal-stock-web pointer stock stock-9']")
 
     if (!outOfStockSpan) {
-      stock = true
-      log(
-        chalk(`PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`)
-      )
+      const pagePrice =
+        Number(
+          await page.evaluate(
+            'document.querySelector("div[class=\'price\']").children[0].textContent.replace("€", ".")'
+          )
+        ) || undefined
+
+      if (!maxPrice || (maxPrice && pagePrice && pagePrice <= maxPrice)) {
+        stock = true
+        log(
+          chalk(
+            `PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`
+          )
+        )
+      }
     } else {
       log(
         chalk(

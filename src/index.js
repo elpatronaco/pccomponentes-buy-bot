@@ -1,6 +1,5 @@
 const Bot = require('./scripts/app')
-const data = require('./data.json')
 
-const app = new Bot({ ...data })
+const app = new Bot()
 
 app.run()

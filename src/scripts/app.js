@@ -1,82 +1,52 @@
 const puppeteer = require('puppeteer')
 const chalk = require('chalk')
 const log = console.log
-
-Array.prototype.forEachAsync = async function (fn) {
-  for (let t of this) {
-    await fn(t)
-  }
-}
+const data = require('../data.json')
+const { getDirectoryNames } = require('../utils')
 
 module.exports = class Bot {
-  // class properties
-  pccomponentes
-  ldlc
-  coolmod
-  debug
-  browserOptions
-
-  // map props to class properties
-  constructor({ pccomponentes, ldlc, coolmod, debug = false, browserOptions }) {
-    ; (this.pccomponentes = pccomponentes),
-      (this.ldlc = ldlc),
-      (this.coolmod = coolmod),
-      (this.debug = debug),
-      (this.browserOptions = browserOptions)
-  }
+  stores
 
   // main method
   async run() {
     try {
+      this.stores = getDirectoryNames(__dirname)
+
       this.checkParams()
+
+      log(`Starting bot for stores ${chalk.green(this.stores.join(', '))}`)
 
       // this creates a new chrome window
       const browser = await puppeteer.launch(
-        this.debug ? this.browserOptions.debug : this.browserOptions.headless
+        data.debug ? data.browserOptions.debug : data.browserOptions.headless
       )
 
-      const stores = [
-        {
-          data: this.pccomponentes,
-          buy: require('./pccomponentes/buy'),
-          login: require('./pccomponentes/login')
-        },
-        {
-          data: this.ldlc,
-          buy: require('./ldlc/buy'),
-          login: require('./ldlc/login')
-        },
-        {
-          data: this.coolmod,
-          buy: require('./coolmod/buy'),
-          login: require('./coolmod/login')
-        }
-      ]
-
-      const loginPage = this.debug
+      const loginPage = data.debug
         ? await browser.newPage()
         : await this.createHeadlessPage(browser)
 
-      await stores.forEachAsync(async store => {
-        if (store.data)
-          await store.login(loginPage, {
-            email: store.data.email,
-            password: store.data.password
+      await this.stores.forEachAsync(async store => {
+        if (data[store])
+          await require(`./${store}/login.js`)(loginPage, {
+            email: data[store].email,
+            password: data[store].password
           })
       })
 
       await loginPage.close()
 
-      await stores.forEachAsync(async store => {
-        if (store.data)
-          if (Array.isArray(store.data.items)) {
-            store.data.items.forEach(item => this.runItemInstance(browser, store.buy, item))
+      await this.stores.forEachAsync(async store => {
+        if (data[store]) {
+          const buyScript = require(`./${store}/buy.js`)
+          if (Array.isArray(data[store].items)) {
+            data[store].items.forEach(item => this.runItemInstance(browser, buyScript, item))
           } else {
-            await this.runItemInstance(browser, store.buy, store.data.items)
+            await this.runItemInstance(browser, buyScript, data[store].items)
           }
+        }
       })
     } catch (err) {
-      log(chalk.red('ERROR NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW'))
+      log(chalk.redBright('! EXCEPTION NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW !'))
       log(chalk.whiteBright(err))
     }
   }
@@ -92,8 +62,7 @@ module.exports = class Bot {
         log(chalk.bgRedBright.white(err))
       }
       await itemPage.close()
-      if (!attempting)
-        for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+      if (!attempting) for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
       else
         log(
           chalk
@@ -114,7 +83,13 @@ module.exports = class Bot {
       store.items &&
       (Array.isArray(store.items) || typeof store.items === 'object')
 
-    if (!(check(this.pccomponentes) || check(this.ldlc) || check(this.coolmod))) {
+    let correctStores = 0
+
+    this.stores.forEach(store => {
+      if (check(data[store])) correctStores++
+    })
+
+    if (correctStores === 0) {
       log(
         chalk.bgRed(
           'One parameter or many in file data.json is/are incorrect, compare them with the ones on github'

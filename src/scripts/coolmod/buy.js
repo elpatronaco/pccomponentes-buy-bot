@@ -28,10 +28,28 @@ module.exports = async (page, { link, maxPrice }) => {
       )
       await page.waitForTimeout(data.refreshRate || 1000)
     } else {
-      stock = true
-      log(
-        chalk(`PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`)
+      const price = Number(
+        await page.evaluate(
+          'document.getElementsByClassName("container-price-total")[0].textContent.trim().replace(",", ".").replace("€", "")'
+        )
       )
+
+      if (!maxPrice || (maxPrice && price && price <= maxPrice)) {
+        stock = true
+        log(
+          chalk(
+            `PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`
+          )
+        )
+      } else {
+        log(
+          chalk.red(
+            price
+              ? `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
+              : 'Price not found'
+          )
+        )
+      }
     }
   }
 
@@ -45,22 +63,11 @@ module.exports = async (page, { link, maxPrice }) => {
 
   await page.waitForTimeout(1000)
 
+  log(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
+
   await page.evaluate('document.querySelector("input[data-slug=\'seur-24-48h\']").click()')
 
   await page.waitForTimeout(1500)
-
-  /* const shipment = await page.$("input[data-slug='seur-24-48h']")
-  await shipment.focus()
-  await shipment.click()
-
-  await page.waitForTimeout(1000) 
-
-  await (await page.waitForSelector("#payment_id_4")).click() 
-  await page.waitForTimeout(1000)
-
-  await (await page.$("#tosAccepted")).click()
-
-  await (await page.$("a[class='button-buy']")).click() */
 
   log(chalk.yellowBright('Selecting bank transfer as payment on ldlc'))
 
@@ -73,6 +80,8 @@ module.exports = async (page, { link, maxPrice }) => {
   await page.evaluate("document.getElementById('tosAccepted').click()")
 
   await page.waitForTimeout(1000)
+
+  log(chalk.green('Attempting buy of ' + chalk.bold(name)))
 
   if (!data.debug) await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
 
