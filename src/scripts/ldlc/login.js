@@ -18,11 +18,5 @@ module.exports = async (page, { email, password }) => {
 
   await page.waitForTimeout(5000)
 
-  // checks if logged in
-  if (page.url() === 'https://secure2.ldlc.com/es-es/Account')
-    log(chalk.greenBright(`Successfully logged in as ${email} on ldlc`))
-  else {
-    log(chalk.redBright(`Login to account with email ${email} on ldlc failed`))
-    process.exit(1)
-  }
+  return page.url() === 'https://secure2.ldlc.com/es-es/Account'
 }

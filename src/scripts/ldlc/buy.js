@@ -52,7 +52,7 @@ module.exports = async (page, { link, maxPrice }) => {
       } else log(chalk.redBright("Didn't find fast order button"))
     })
 
-  log(chalk.yellowBright('Selecting bank transfer as payment on ldlc'))
+  log(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
 
   await page.waitForSelector('#optPayment260008').then(async value => {
     if (value) {
@@ -63,7 +63,7 @@ module.exports = async (page, { link, maxPrice }) => {
 
   await page.waitForSelector("button[class='button color2 maxi']")
 
-  log(chalk.green('Attempting buy of ' + chalk.bold(name)))
+  log(chalk.yellow('Attempting buy of ' + chalk.bold(name)))
 
   await page.$("button[class='button color2 maxi']").then(async value => {
     if (value) {

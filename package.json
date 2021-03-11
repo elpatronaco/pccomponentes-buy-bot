@@ -1,5 +1,5 @@
 {
-  "name": "pccomponentes-buy-bot",
+  "name": "buy-bot",
   "version": "1.0.0",
   "author": "elPatron",
   "license": "MIT",
@@ -15,7 +15,10 @@
   },
   "keywords": [
     "pccomponentes",
-    "bot"
+    "buybot",
+    "ldlc",
+    "coolmod",
+    "gpu"
   ],
   "bugs": {
     "url": "https://github.com/elpatronaco/pccomponentes-buy-bot/issues"

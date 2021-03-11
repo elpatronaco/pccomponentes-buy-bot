@@ -88,7 +88,7 @@ module.exports = async (page, { link, maxPrice }) => {
   )
     await page.waitForTimeout(200)
 
-  log(chalk.green('Attempting buy of ' + chalk.bold(name)))
+  log(chalk.yellow('Attempting buy of ' + chalk.bold(name)))
 
   let attempting = true
 

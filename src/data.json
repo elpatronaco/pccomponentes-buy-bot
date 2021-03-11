@@ -29,6 +29,7 @@
       }
     ]
   },
+  "onlyOneBuy": true,
   "debug": false,
   "refreshRate": 1000,
   "browserOptions": {

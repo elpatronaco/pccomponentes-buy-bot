@@ -21,11 +21,5 @@ module.exports = async (page, { email, password }) => {
 
   await page.waitForTimeout(5000)
 
-  // checks if logged in
-  if (page.url() === 'https://www.pccomponentes.com/')
-    log(chalk.greenBright(`Successfully logged in as ${email} in pccomponentes`))
-  else {
-    log(chalk.redBright(`Login to pccomponentes account with email ${email} failed`))
-    process.exit(1)
-  }
+  return page.url() === 'https://www.pccomponentes.com/'
 }

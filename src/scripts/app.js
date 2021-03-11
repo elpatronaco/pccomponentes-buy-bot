@@ -14,26 +14,36 @@ module.exports = class Bot {
 
       this.checkParams()
 
-      log(`Starting bot for stores ${chalk.green(this.stores.join(', '))}`)
+      log(`Starting bot`)
 
       // this creates a new chrome window
       const browser = await puppeteer.launch(
         data.debug ? data.browserOptions.debug : data.browserOptions.headless
       )
 
-      const loginPage = data.debug
-        ? await browser.newPage()
-        : await this.createHeadlessPage(browser)
-
       await this.stores.forEachAsync(async store => {
-        if (data[store])
-          await require(`./${store}/login.js`)(loginPage, {
+        if (data[store]) {
+          const loginPage = data.debug
+            ? await browser.newPage()
+            : await this.createHeadlessPage(browser)
+
+          log(`Attempting login in ${store}`)
+
+          const loginResult = await require(`./${store}/login.js`)(loginPage, {
             email: data[store].email,
             password: data[store].password
           })
-      })
 
-      await loginPage.close()
+          if (loginResult)
+            log(chalk.green(`Successfully logged in as ${data[store].email} to ${store}`))
+          else {
+            log(chalk.red(`Login on ${store} failed. Check your credentials`))
+            process.exit(1)
+          }
+
+          await loginPage.close()
+        }
+      })
 
       await this.stores.forEachAsync(async store => {
         if (data[store]) {
@@ -46,7 +56,7 @@ module.exports = class Bot {
         }
       })
     } catch (err) {
-      log(chalk.redBright('! EXCEPTION NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW !'))
+      log(chalk.bgRedBright.white('! EXCEPTION NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW !'))
       log(chalk.whiteBright(err))
     }
   }
@@ -61,9 +71,17 @@ module.exports = class Bot {
       } catch (err) {
         log(chalk.bgRedBright.white(err))
       }
+
       await itemPage.close()
-      if (!attempting) for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
-      else
+
+      if (!attempting) {
+        for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+
+        if (data.onlyOneBuy) {
+          log('You set onlyOneBuy to true, exiting the app...')
+          process.exit(1)
+        }
+      } else
         log(
           chalk
             .hex('#ffa500')
@@ -106,7 +124,7 @@ module.exports = class Bot {
     const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
     await page.setUserAgent(chromeUserAgent)
     await page.setExtraHTTPHeaders({
-      'accept-language': 'en-US,en;q=0.8'
+      'accept-language': 'es-ES,es;q=0.8'
     })
 
     return page

@@ -23,14 +23,8 @@ module.exports = async (page, { email, password }) => {
 
   const emailInput = await page.$("input[name='username']")
 
-  // checks if logged in
-  if (
+  return (
     (emailInput === undefined || emailInput === null) &&
     page.url().includes('https://www.coolmod.com/mi-cuenta')
   )
-    log(chalk.greenBright(`Successfully logged in as ${email} on coolmod`))
-  else {
-    log(chalk.redBright(`Login to account with email ${email} on coolmod failed`))
-    process.exit(1)
-  }
 }
