@@ -12,27 +12,31 @@ module.exports = async (page, { link, maxPrice }) => {
   while (!stock) {
     await page.goto(link, { waitUntil: 'networkidle2' })
 
+    log('searching name')
+
     if (!name)
-      name = await page.evaluate(`document.querySelector(".product-first-part").textContent.trim()`)
+      name = await page.evaluate(() => [...document.getElementsByClassName("titulo")].map(el => el.textContent.trim()).join())
 
-    const outOfStockButton = await page.$('.button-not-buy')
+    log(name)
 
-    if (
-      outOfStockButton &&
-      (await page.evaluate(el => el.textContent, outOfStockButton).includes('AGOTADO'))
-    ) {
-      log(
-        chalk(
-          `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
-        )
-      )
-      await page.waitForTimeout(data.refreshRate || 1000)
-    } else {
-      const price = Number(
-        await page.evaluate(
-          'document.getElementsByClassName("container-price-total")[0].textContent.trim().replace(",", ".").replace("€", "")'
-        )
-      )
+    const addToCardButton = await page.$('.button-buy')
+
+    if (addToCardButton) {
+      log('searching price')
+      const price =
+        Number(
+          await page.evaluate(() => {
+            return document.querySelector("span[class='text-price-total']").textContent
+            // return [...document.getElementsByClassName('container-price-total')[0].children]
+            //   .map(el => el.textContent)
+            //   .join()
+            //   .replace(/,+/g, '.')
+            //   .replace('€', '')
+            //   .trim()
+          })
+        ) || undefined
+
+      log(price)
 
       if (!maxPrice || (maxPrice && price && price <= maxPrice)) {
         stock = true
@@ -50,6 +54,13 @@ module.exports = async (page, { link, maxPrice }) => {
           )
         )
       }
+    } else {
+      log(
+        chalk(
+          `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
+        )
+      )
+      await page.waitForTimeout(data.refreshRate || 1000)
     }
   }
 

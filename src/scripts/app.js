@@ -45,14 +45,12 @@ module.exports = class Bot {
         }
       })
 
-      await this.stores.forEachAsync(async store => {
+      this.stores.forEach(store => {
         if (data[store]) {
           const buyScript = require(`./${store}/buy.js`)
-          if (Array.isArray(data[store].items)) {
+          if (Array.isArray(data[store].items))
             data[store].items.forEach(item => this.runItemInstance(browser, buyScript, item))
-          } else {
-            await this.runItemInstance(browser, buyScript, data[store].items)
-          }
+          else this.runItemInstance(browser, buyScript, data[store].items)
         }
       })
     } catch (err) {

@@ -19,12 +19,9 @@ module.exports = async (page, { email, password }) => {
   await page.keyboard.type(password.trim())
   await page.evaluate('document.querySelector("input[type=\'submit\']").click()')
 
-  await page.waitForTimeout(8000)
+  await page.waitForTimeout(10000)
 
-  const emailInput = await page.$("input[name='username']")
+  const userDropdown = await page.$('#usuario_login')
 
-  return (
-    (emailInput === undefined || emailInput === null) &&
-    page.url().includes('https://www.coolmod.com/mi-cuenta')
-  )
+  return userDropdown && page.url().includes('https://www.coolmod.com/mi-cuenta')
 }

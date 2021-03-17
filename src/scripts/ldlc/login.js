@@ -16,7 +16,7 @@ module.exports = async (page, { email, password }) => {
   await page.keyboard.type(password.trim())
   await page.keyboard.press('Enter')
 
-  await page.waitForTimeout(5000)
+  await page.waitForTimeout(10000)
 
-  return page.url() === 'https://secure2.ldlc.com/es-es/Account'
+  return page.url().includes('https://secure2.ldlc.com/es-es/Account')
 }
