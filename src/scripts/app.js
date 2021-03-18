@@ -118,6 +118,7 @@ module.exports = class Bot {
   async createHeadlessPage(browser) {
     const page = await browser.newPage()
 
+    page.setDefaultNavigationTimeout(data.timeout)
     const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
     const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
     await page.setUserAgent(chromeUserAgent)
