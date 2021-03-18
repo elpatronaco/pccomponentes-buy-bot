@@ -43,3 +43,52 @@ en la carpeta del proyecto. Después tienes que cambiar los parámetros en el ar
 ```
 
 Finalmente ejecuta `npm start` y deja que trabaje
+
+## Posibles errores
+
+### Error del ejecutable de Chromium
+
+Si estas ejecutando el bot en un dispositivo con arquitectura ARM posiblemente de error la versión de chromium que viene por defecto con puppeteer. Para solucionarlo es necesario instalar Chromium de manera externa. Puedes hacerlo así si estas en Ubuntu o Debian:
+
+```
+apt install chromium-browser
+```
+
+Una vez instalado Chromium debes indicar al bot que quieres cargar la versión externa de Chromium. Para ello es necesario saber donde se encuentra Chromium, puedes encontrar la ruta así si estas en Ubuntu o Debian:
+
+```
+which chromium-browser
+```
+
+Una vez obtenida la ruta de Chromium (normalmente es /usr/bin/chromium-browser), debes añadirla a los ajustes del bot en el fichero data.json. Debe quedar así:
+
+```json
+{
+  "browserOptions": {
+    "headless": {
+      "headless": true,
+      "defaultViewport": null,
+      "executablePath": "/usr/bin/chromium-browser"
+    },
+    "debug": {
+      "headless": false,
+      "args": ["--start-maximized"],
+      "defaultViewport": null
+    }
+  }
+}
+```
+
+Ahora prueba a ejecutar el bot, este debería de funcionar correctamente.
+
+### Error Timeout al abrir las páginas
+
+Si os encontrais con este error es porque el dispositivo donde estes ejecutando el bot no es capaz de cargar todas las páginas que le habeis introducido en 30s (es el timeout por defecto). Para corregir este error debeis subir el Timeout del bot desde el fichero data.json. También podeis deshabilitarlo si lo poneis a cero.
+
+```json
+{
+  "timeout": 0
+}
+```
+
+Con esto debería de estar corregido el error, pero os recomiendo reducir el número de páginas a consultar ya que ralentizará al bot en general puesto que estais sobrecargando la máquina que lo ejecuta.
