@@ -18,7 +18,13 @@ module.exports = class Bot {
 
       // this creates a new chrome window
       const browser = await puppeteer.launch(
-        data.debug ? data.browserOptions.debug : data.browserOptions.headless
+        data.debug
+          ? data.browserOptions.debug
+          : {
+              executablePath:
+                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+              ...data.browserOptions.headless
+            }
       )
 
       await this.stores.forEachAsync(async store => {
@@ -118,6 +124,7 @@ module.exports = class Bot {
   async createHeadlessPage(browser) {
     const page = await browser.newPage()
 
+    page.setDefaultNavigationTimeout(data.timeout || 0)
     const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
     const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
     await page.setUserAgent(chromeUserAgent)
