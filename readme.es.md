@@ -46,21 +46,21 @@ Finalmente ejecuta `npm start` y deja que trabaje
 
 ## Posibles errores
 
-### Error del ejecutable de Chromium
+### Error del ejecutable de Chromium en UNIX
 
-Si estas ejecutando el bot en un dispositivo con arquitectura ARM posiblemente de error la versión de chromium que viene por defecto con puppeteer. Para solucionarlo es necesario instalar Chromium de manera externa. Puedes hacerlo así si estas en Ubuntu o Debian:
+Si estás ejecutando el bot en un dispositivo con arquitectura ARM posiblemente dé error la versión de chromium que viene por defecto con puppeteer. Para solucionarlo es necesario instalar Chromium de manera externa. Puedes hacerlo así si estas en Ubuntu o Debian:
 
 ```
-apt install chromium-browser
+sudo apt install chromium-browser
 ```
 
-Una vez instalado Chromium debes indicar al bot que quieres cargar la versión externa de Chromium. Para ello es necesario saber donde se encuentra Chromium, puedes encontrar la ruta así si estas en Ubuntu o Debian:
+Una vez instalado Chromium debes indicar al bot que quieres cargar la versión externa de Chromium. Para ello es necesario saber donde se encuentra Chromium, puedes encontrar la ruta así si tu sistema es Ubuntu o Debian:
 
 ```
 which chromium-browser
 ```
 
-Una vez obtenida la ruta de Chromium (normalmente es /usr/bin/chromium-browser), debes añadirla a los ajustes del bot en el fichero data.json. Debe quedar así:
+Una vez obtenida la ruta de Chromium (por defecto es /usr/bin/chromium-browser), debes añadirla a los ajustes del bot en el fichero data.json. Debe quedar así:
 
 ```json
 {
@@ -68,7 +68,7 @@ Una vez obtenida la ruta de Chromium (normalmente es /usr/bin/chromium-browser),
     "headless": {
       "headless": true,
       "defaultViewport": null,
-      "executablePath": "/usr/bin/chromium-browser"
+      "executablePath": "/usr/bin/chromium-browser" // ruta
     },
     "debug": {
       "headless": false,
@@ -83,11 +83,11 @@ Ahora prueba a ejecutar el bot, este debería de funcionar correctamente.
 
 ### Error Timeout al abrir las páginas
 
-Si os encontrais con este error es porque el dispositivo donde estes ejecutando el bot no es capaz de cargar todas las páginas que le habeis introducido en 30s (es el timeout por defecto). Para corregir este error debeis subir el Timeout del bot desde el fichero data.json. También podeis deshabilitarlo si lo poneis a cero.
+Si os encontrais con este error es porque el dispositivo donde estés ejecutando el bot no es capaz de cargar todas las páginas que le has introducido en 30s (es el timeout por defecto). Para corregir este error debes subir el Timeout del bot desde el fichero data.json. También se puede deshabilitar si se pone a 0.
 
 ```json
 {
-  "timeout": 0
+  "timeout": 30000 // milisegundos
 }
 ```
 
