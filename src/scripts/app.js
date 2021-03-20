@@ -2,7 +2,8 @@ const puppeteer = require('puppeteer')
 const chalk = require('chalk')
 const log = console.log
 const data = require('../data.json')
-const { getDirectoryNames } = require('../utils')
+const path = require('path')
+const { getDirectoryNames, sleep } = require('../utils')
 
 module.exports = class Bot {
   stores
@@ -16,15 +17,22 @@ module.exports = class Bot {
 
       log(`Starting bot`)
 
-      // this creates a new chrome window
+      // console.time('test')
+      // log(await require('./ldlc/scrape')({
+      //   link:
+      //     'https://www.ldlc.com/es-es/ficha/PB00385535.html'
+      // }))
+      // console.timeEnd('test')
+
+      // this creates a new chrome instance
       const browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
           : {
-              executablePath:
-                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-              ...data.browserOptions.headless
-            }
+            executablePath:
+              process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+            ...data.browserOptions.headless
+          }
       )
 
       await this.stores.forEachAsync(async store => {
@@ -35,7 +43,7 @@ module.exports = class Bot {
 
           log(`Attempting login in ${store}`)
 
-          const loginResult = await require(`./${store}/login.js`)(loginPage, {
+          const loginResult = await require(path.join(__dirname, store, 'login'))(loginPage, {
             email: data[store].email,
             password: data[store].password
           })
@@ -53,10 +61,9 @@ module.exports = class Bot {
 
       this.stores.forEach(store => {
         if (data[store]) {
-          const buyScript = require(`./${store}/buy.js`)
           if (Array.isArray(data[store].items))
-            data[store].items.forEach(item => this.runItemInstance(browser, buyScript, item))
-          else this.runItemInstance(browser, buyScript, data[store].items)
+            data[store].items.forEach(item => this.runItemInstance(browser, store, item))
+          else this.runItemInstance(browser, store, data[store].items)
         }
       })
     } catch (err) {
@@ -65,18 +72,51 @@ module.exports = class Bot {
     }
   }
 
-  async runItemInstance(browser, script, item) {
+  async runItemInstance(browser, store, item) {
+    const scrape = require(path.join(__dirname, store, 'scrape'))
+    const buy = require(path.join(__dirname, store, 'buy'))
+
     let attempting = true
     do {
-      const itemPage = await this.createHeadlessPage(browser)
-
       try {
-        attempting = !(await script(itemPage, item))
-      } catch (err) {
-        log(chalk.bgRedBright.white(err))
-      }
+        let canBuy = false
+        do {
+          const resp = await scrape(item)
+          if (resp.stock) {
+            if (item.maxPrice <= resp.price) {
+              log(
+                chalk.red(
+                  `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
+                )
+              )
+            } else {
+              log(
+                chalk(
+                  `PRODUCT ${resp.name && chalk.bold(resp.name)} ${chalk.cyan(
+                    'IN STOCK!'
+                  )} Starting buy process`
+                )
+              )
+              canBuy = true
+            }
+          } else {
+            log(
+              chalk(
+                `Product ${resp.name && chalk.bold(resp.name)
+                } is not yet in stock (${new Date().toUTCString()})`
+              )
+            )
+            await sleep(data.refreshRate || 1000)
+          }
+        } while (!canBuy)
 
-      await itemPage.close()
+        // buys item
+        const itemPage = await this.createHeadlessPage(browser)
+        attempting = !(await buy(itemPage, item))
+        await itemPage.close()
+      } catch (err) {
+        log(chalk.redBright(err))
+      }
 
       if (!attempting) {
         for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))

@@ -1,7 +1,3 @@
-const chalk = require('chalk')
-
-const log = console.log
-
 module.exports = async (page, { email, password }) => {
   await page.goto('https://www.aussar.es/iniciar-sesion', { waitUntil: 'networkidle2' })
 

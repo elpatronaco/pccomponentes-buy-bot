@@ -1,7 +1,3 @@
-const chalk = require('chalk')
-
-const log = console.log
-
 module.exports = async (page, { email, password }) => {
   await page.goto('https://www.coolmod.com/mi-cuenta', {
     waitUntil: 'networkidle2'

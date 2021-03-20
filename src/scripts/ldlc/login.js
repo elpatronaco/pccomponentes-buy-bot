@@ -1,8 +1,3 @@
-const puppeteer = require('puppeteer')
-const chalk = require('chalk')
-
-const log = console.log
-
 module.exports = async (page, { email, password }) => {
   await page.goto('https://secure2.ldlc.com/es-es/Login/Login?returnUrl=%2Fes-es%2FAccount', {
     waitUntil: 'networkidle2'

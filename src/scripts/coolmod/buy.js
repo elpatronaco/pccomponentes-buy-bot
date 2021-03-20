@@ -15,7 +15,9 @@ module.exports = async (page, { link, maxPrice }) => {
     log('searching name')
 
     if (!name)
-      name = await page.evaluate(() => [...document.getElementsByClassName("titulo")].map(el => el.textContent.trim()).join())
+      name = await page.evaluate(() =>
+        [...document.getElementsByClassName('titulo')].map(el => el.textContent.trim()).join()
+      )
 
     log(name)
 
