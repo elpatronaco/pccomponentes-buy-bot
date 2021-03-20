@@ -9,7 +9,7 @@ module.exports = async ({ link }) =>
       },
       stock: {
         selector: '.modal-stock-web',
-        convert: x => x.includes('En stock')
+        convert: x => x.includes('En stock') || x.includes('Disponible')
       },
       image: {
         selector: '#ctl00_cphMainContent_ImgProduct',
