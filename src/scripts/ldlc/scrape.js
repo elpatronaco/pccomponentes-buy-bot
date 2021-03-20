@@ -18,7 +18,7 @@ module.exports = async ({ link }) =>
       },
       name: {
         selector: '.title-1',
-        convert: x => x.trim()
+        convert: x => x.trim().replace(/(\r\n|\n|\r)/gm, "")
       }
     })
   ).data

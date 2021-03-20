@@ -17,7 +17,8 @@ module.exports = async ({ link }) =>
         attr: 'src'
       },
       name: {
-        selector: '.articulo'
+        selector: '.articulo',
+        convert: x => x.trim().replace(/(\r\n|\n|\r)/gm, "")
       }
     })
   ).data

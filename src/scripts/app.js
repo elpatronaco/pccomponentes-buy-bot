@@ -73,7 +73,7 @@ module.exports = class Bot {
     const buy = require(path.join(__dirname, store, 'buy'))
 
     const customLog = (resp, content) =>
-      log(chalk(`[${chalk.cyanBright(store)}] ${resp.name.substr(0, 35)}: ${content}`))
+      log(chalk(`[${chalk.cyanBright(store)}] ${resp.name && resp.name.substr(0, 35)}: ${content}`))
 
     let attempting = true
     do {
