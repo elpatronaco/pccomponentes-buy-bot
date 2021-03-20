@@ -3,61 +3,8 @@ const chalk = require('chalk')
 const log = console.log
 const data = require('../../data.json')
 
-module.exports = async (page, { link, maxPrice }) => {
-  let stock = false
-  let price
-  let name
-
-  // this loop will play till stock is available, then to the next step
-  while (!stock) {
-    await page.goto(link, { waitUntil: 'domcontentloaded' })
-    // 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2'
-
-    if (!name)
-      name = await page.evaluate(
-        `document.querySelector("h1[class='h1 product-detail-name']").textContent.trim()`
-      )
-
-    const buyDisabled = await page.evaluate(
-      'document.querySelector("button[data-button-action=\'add-to-cart\']").disabled'
-    )
-
-    if (!buyDisabled) {
-      price =
-        Number(
-          await page.evaluate(
-            'document.querySelector("span[itemprop=\'price\']").getAttribute("content")'
-          )
-        ) || undefined
-
-      // checks if current price is below max price before continuing
-      if (!maxPrice || (maxPrice && price && price <= maxPrice)) {
-        stock = true
-        log(
-          chalk(
-            `PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`
-          )
-        )
-      } else {
-        log(
-          chalk.red(
-            price
-              ? `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
-              : 'Price not found'
-          )
-        )
-      }
-    } else {
-      // Else, proceeds to check the price and compare it to the maximum price if provided
-      log(
-        chalk(
-          `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
-        )
-      )
-
-      await page.waitForTimeout(data.refreshRate || 1000)
-    }
-  }
+module.exports = async (page, { link }) => {
+  await page.goto(link, { waitUntil: 'domcontentloaded' })
 
   await (await page.$("button[data-button-action='add-to-cart']")).click()
 
@@ -103,12 +50,12 @@ module.exports = async (page, { link, maxPrice }) => {
     'document.getElementById("conditions_to_approve[terms-and-conditions]").click()'
   )
 
-  log(chalk.yellow('Attempting buy of ' + chalk.bold(name)))
+  log(chalk.yellow('Attempting buy'))
 
   const buyButton = await page.$('#payment-confirmation').$("button[type='submit']")
 
   if (buyButton) {
-    await buyButton.click()
+    if (!data.debug) await buyButton.click()
   } else log(chalk.red("Couldn't find buy button"))
 
   await page.waitForTimeout(5000)

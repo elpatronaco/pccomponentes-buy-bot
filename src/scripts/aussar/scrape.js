@@ -4,20 +4,20 @@ module.exports = async ({ link }) =>
   (
     await scrape(link, {
       price: {
-        selector: '#product-page-price',
-        attr: 'data-price',
+        selector: "span[itemprop='price']",
+        attr: 'content',
         convert: x => Number(x)
       },
       stock: {
-        selector: '.modal-stock-web',
-        convert: x => x.includes('En stock') || x.includes('Disponible')
+        selector: '#product-availability',
+        convert: x => !x.trim().includes('Fuera de stock')
       },
       image: {
-        selector: '#ctl00_cphMainContent_ImgProduct',
+        selector: '.js-thumb',
         attr: 'src'
       },
       name: {
-        selector: '.title-1',
+        selector: 'h1.product-detail-name',
         convert: x => x.trim()
       }
     })

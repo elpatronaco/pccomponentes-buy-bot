@@ -17,22 +17,15 @@ module.exports = class Bot {
 
       log(`Starting bot`)
 
-      // console.time('test')
-      // log(await require('./ldlc/scrape')({
-      //   link:
-      //     'https://www.ldlc.com/es-es/ficha/PB00385535.html'
-      // }))
-      // console.timeEnd('test')
-
       // this creates a new chrome instance
       const browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
           : {
-              executablePath:
-                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-              ...data.browserOptions.headless
-            }
+            executablePath:
+              process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+            ...data.browserOptions.headless
+          }
       )
 
       await this.stores.forEachAsync(async store => {
@@ -59,10 +52,13 @@ module.exports = class Bot {
         }
       })
 
-      this.stores.forEach(store => {
+      await this.stores.forEachAsync(async store => {
         if (data[store]) {
           if (Array.isArray(data[store].items))
-            data[store].items.forEach(item => this.runItemInstance(browser, store, item))
+            await data[store].items.forEachAsync(async item => {
+              this.runItemInstance(browser, store, item)
+              await sleep(50)
+            })
           else this.runItemInstance(browser, store, data[store].items)
         }
       })
@@ -76,6 +72,9 @@ module.exports = class Bot {
     const scrape = require(path.join(__dirname, store, 'scrape'))
     const buy = require(path.join(__dirname, store, 'buy'))
 
+    const customLog = (resp, content) =>
+      log(chalk(`[${chalk.cyanBright(store)}] ${resp.name.substr(0, 35)}: ${content}`))
+
     let attempting = true
     do {
       try {
@@ -83,32 +82,24 @@ module.exports = class Bot {
         do {
           const resp = await scrape(item)
           if (resp.stock) {
-            if (item.maxPrice <= resp.price) {
-              log(
-                chalk.red(
-                  `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
-                )
-              )
-            } else {
-              log(
-                chalk(
-                  `PRODUCT ${resp.name && chalk.bold(resp.name)} ${chalk.cyan(
-                    'IN STOCK!'
-                  )} Starting buy process`
-                )
-              )
+            if (!item.maxPrice || (item.maxPrice && resp.price <= item.maxPrice)) {
+              customLog(resp, chalk.bgGreenBright('PRODUCT IN STOCK! Starting buy process'))
               canBuy = true
+            } else {
+              customLog(
+                resp,
+                chalk.red(
+                  `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${resp.price}€`
+                )
+              )
             }
           } else {
-            log(
-              chalk(
-                `Product ${
-                  resp.name && chalk.bold(resp.name)
-                } is not yet in stock (${new Date().toUTCString()})`
-              )
+            customLog(
+              resp,
+              chalk.blueBright(`Product is not yet in stock (${new Date().toUTCString()}`)
             )
-            await sleep(data.refreshRate || 1000)
           }
+          if (!canBuy) await sleep(data.refreshRate || 1000)
         } while (!canBuy)
 
         // buys item
@@ -120,17 +111,15 @@ module.exports = class Bot {
       }
 
       if (!attempting) {
-        for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+        for (let i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
 
         if (data.onlyOneBuy) {
           log('You set onlyOneBuy to true, exiting the app...')
           process.exit(1)
         }
       } else
-        log(
-          chalk
-            .hex('#ffa500')
-            .italic('ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK')
+        customLog(
+          chalk.hex('#ffa500')('ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK')
         )
     } while (attempting)
   }

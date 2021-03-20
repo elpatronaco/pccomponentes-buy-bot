@@ -26,7 +26,7 @@ module.exports = async (page, { link }) => {
 
   await page.waitForSelector("button[class='button color2 maxi']")
 
-  log(chalk.yellow('Attempting buy of ' + chalk.bold(name)))
+  log(chalk.yellow('Attempting buy of'))
 
   await page.$("button[class='button color2 maxi']").then(async value => {
     if (value) {

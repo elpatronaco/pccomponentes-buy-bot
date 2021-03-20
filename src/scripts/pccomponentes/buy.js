@@ -5,7 +5,7 @@ const data = require('../../data.json')
 
 module.exports = async (page, { link }) => {
   await page.goto(link, {
-    waitUntil: 'networkidle2'
+    waitUntil: 'domcontentloaded'
   })
 
   // buys product

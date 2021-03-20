@@ -4,19 +4,29 @@ module.exports = async ({ link }) =>
   (
     await scrape(link, {
       price: {
-        selector: 'span[class="text-price-total"]',
-        how: x => Number(x.textContent.trim())
+        selector: '.container-price-total',
+        convert: x =>
+          Number(
+            x
+              .trim()
+              .replace(/[^0-9,]/g, '')
+              .replace(',', '.')
+          )
       },
       stock: {
-        selector: '.button-buy'
+        selector: '.product-availability',
+        convert: x => !x.trim().includes('Sin Stock')
       },
       image: {
-        selector: 'div.container-main-image a img',
+        selector: '#_image2',
         attr: 'src'
       },
       name: {
         selector: '.product-first-part',
-        convert: x => x.textContent.trim()
+        convert: x => {
+          console.log(x)
+          return x.trim()
+        }
       }
     })
   ).data
