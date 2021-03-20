@@ -2,7 +2,8 @@ const puppeteer = require('puppeteer')
 const chalk = require('chalk')
 const log = console.log
 const data = require('../data.json')
-const { getDirectoryNames } = require('../utils')
+const path = require('path')
+const { getDirectoryNames, sleep } = require('../utils')
 
 module.exports = class Bot {
   stores
@@ -16,15 +17,15 @@ module.exports = class Bot {
 
       log(`Starting bot`)
 
-      // this creates a new chrome window
+      // this creates a new chrome instance
       const browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
           : {
-              executablePath:
-                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-              ...data.browserOptions.headless
-            }
+            executablePath:
+              process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+            ...data.browserOptions.headless
+          }
       )
 
       await this.stores.forEachAsync(async store => {
@@ -35,7 +36,7 @@ module.exports = class Bot {
 
           log(`Attempting login in ${store}`)
 
-          const loginResult = await require(`./${store}/login.js`)(loginPage, {
+          const loginResult = await require(path.join(__dirname, store, 'login'))(loginPage, {
             email: data[store].email,
             password: data[store].password
           })
@@ -51,12 +52,14 @@ module.exports = class Bot {
         }
       })
 
-      this.stores.forEach(store => {
+      await this.stores.forEachAsync(async store => {
         if (data[store]) {
-          const buyScript = require(`./${store}/buy.js`)
           if (Array.isArray(data[store].items))
-            data[store].items.forEach(item => this.runItemInstance(browser, buyScript, item))
-          else this.runItemInstance(browser, buyScript, data[store].items)
+            await data[store].items.forEachAsync(async item => {
+              this.runItemInstance(browser, store, item)
+              await sleep(50)
+            })
+          else this.runItemInstance(browser, store, data[store].items)
         }
       })
     } catch (err) {
@@ -65,31 +68,58 @@ module.exports = class Bot {
     }
   }
 
-  async runItemInstance(browser, script, item) {
+  async runItemInstance(browser, store, item) {
+    const scrape = require(path.join(__dirname, store, 'scrape'))
+    const buy = require(path.join(__dirname, store, 'buy'))
+
+    const customLog = (resp, content) =>
+      log(chalk(`[${chalk.cyanBright(store)}] ${resp.name.substr(0, 35)}: ${content}`))
+
     let attempting = true
     do {
-      const itemPage = await this.createHeadlessPage(browser)
-
       try {
-        attempting = !(await script(itemPage, item))
+        let canBuy = false
+        do {
+          const resp = await scrape(item)
+          if (resp.stock) {
+            if (!item.maxPrice || (item.maxPrice && resp.price <= item.maxPrice)) {
+              customLog(resp, chalk.bgGreenBright('PRODUCT IN STOCK! Starting buy process'))
+              canBuy = true
+            } else {
+              customLog(
+                resp,
+                chalk.red(
+                  `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${resp.price}€`
+                )
+              )
+            }
+          } else {
+            customLog(
+              resp,
+              chalk.blueBright(`Product is not yet in stock (${new Date().toUTCString()}`)
+            )
+          }
+          if (!canBuy) await sleep(data.refreshRate || 1000)
+        } while (!canBuy)
+
+        // buys item
+        const itemPage = await this.createHeadlessPage(browser)
+        attempting = !(await buy(itemPage, item))
+        await itemPage.close()
       } catch (err) {
-        log(chalk.bgRedBright.white(err))
+        log(chalk.redBright(err))
       }
 
-      await itemPage.close()
-
       if (!attempting) {
-        for (var i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+        for (let i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
 
         if (data.onlyOneBuy) {
           log('You set onlyOneBuy to true, exiting the app...')
           process.exit(1)
         }
       } else
-        log(
-          chalk
-            .hex('#ffa500')
-            .italic('ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK')
+        customLog(
+          chalk.hex('#ffa500')('ITEM NOT BOUGHT FOR WHATEVER REASON, WAITING AGAIN FOR STOCK')
         )
     } while (attempting)
   }

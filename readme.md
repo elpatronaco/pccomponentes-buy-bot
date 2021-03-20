@@ -1,5 +1,9 @@
 # Buy bot
 
+**If you support my work you can donate here:**
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/paucolome)[![Donate](https://img.shields.io/badge/BitCoin-bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq-yellow)](https://link.trustwallet.com/send?coin=0&address=bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq)[![Donate](https://img.shields.io/badge/NANO-nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9-9cf)](https://link.trustwallet.com/send?coin=165&address=nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9)
+
 A small buying bot made in node so you can get the 3080 you're dying for. (_This could be outdated because of changes on the website. Pull requests are welcome_)
 
 ### Currently supported stores:
@@ -80,15 +84,3 @@ Once you've got Chromium's path (by default it's /usr/bin/chromium-browser), you
 ```
 
 Bot should now work properly.
-
-### Timeout error on opening pages
-
-If you find this error it may happen because the device it's being ran on isn't capable of loading all pages in the 30 seconds timespan limit. To solve this you can supply a custom timeout. You can disable it setting it to 0 or deleting it from the data.json file.
-
-```json
-{
-  "timeout": 30000 // milliseconds
-}
-```
-
-It is recommended to reduce the number of pages if the device isn't that capable, because it will slow down bot's overall process.

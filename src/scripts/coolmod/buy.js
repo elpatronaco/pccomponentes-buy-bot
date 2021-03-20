@@ -3,66 +3,8 @@ const chalk = require('chalk')
 const log = console.log
 const data = require('../../data.json')
 
-module.exports = async (page, { link, maxPrice }) => {
-  // navigates to the item link provided
-  let stock = false
-  let name
-
-  // this loop will play till stock is available, then to the next step
-  while (!stock) {
-    await page.goto(link, { waitUntil: 'networkidle2' })
-
-    log('searching name')
-
-    if (!name)
-      name = await page.evaluate(() => [...document.getElementsByClassName("titulo")].map(el => el.textContent.trim()).join())
-
-    log(name)
-
-    const addToCardButton = await page.$('.button-buy')
-
-    if (addToCardButton) {
-      log('searching price')
-      const price =
-        Number(
-          await page.evaluate(() => {
-            return document.querySelector("span[class='text-price-total']").textContent
-            // return [...document.getElementsByClassName('container-price-total')[0].children]
-            //   .map(el => el.textContent)
-            //   .join()
-            //   .replace(/,+/g, '.')
-            //   .replace('€', '')
-            //   .trim()
-          })
-        ) || undefined
-
-      log(price)
-
-      if (!maxPrice || (maxPrice && price && price <= maxPrice)) {
-        stock = true
-        log(
-          chalk(
-            `PRODUCT ${name && chalk.bold(name)} ${chalk.cyan('IN STOCK!')} Starting buy process`
-          )
-        )
-      } else {
-        log(
-          chalk.red(
-            price
-              ? `Price is above max. Max price set - ${maxPrice}€. Current price - ${price}€`
-              : 'Price not found'
-          )
-        )
-      }
-    } else {
-      log(
-        chalk(
-          `Product ${name && chalk.bold(name)} is not yet in stock (${new Date().toUTCString()})`
-        )
-      )
-      await page.waitForTimeout(data.refreshRate || 1000)
-    }
-  }
+module.exports = async (page, { link }) => {
+  await page.goto(link, { waitUntil: 'domcontentloaded' })
 
   await (await page.waitForSelector("button[class='button-buy']")).click()
   await page.waitForTimeout(2000)
@@ -90,7 +32,7 @@ module.exports = async (page, { link, maxPrice }) => {
 
   await page.waitForTimeout(1000)
 
-  log(chalk.yellow('Attempting buy of ' + chalk.bold(name)))
+  log(chalk.yellow('Attempting buy of'))
 
   if (!data.debug) await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
 

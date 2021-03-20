@@ -9,4 +9,6 @@ Array.prototype.forEachAsync = async function (fn) {
 const getDirectoryNames = path =>
   fs.readdirSync(path).filter(file => fs.statSync(`${path}/${file}`).isDirectory())
 
-module.exports = { getDirectoryNames }
+const sleep = async msec => new Promise(resolve => setTimeout(resolve, msec))
+
+module.exports = { getDirectoryNames, sleep }

@@ -26,6 +26,7 @@
   "homepage": "https://github.com/elpatronaco/pccomponentes-buy-bot#readme",
   "dependencies": {
     "chalk": "^4.1.0",
-    "puppeteer": "^8.0.0"
+    "puppeteer": "^8.0.0",
+    "scrape-it": "^5.3.1"
   }
 }

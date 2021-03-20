@@ -1,5 +1,9 @@
 # Bot PCComponentes
 
+**Si te gusta mi trabajo puedes donar aquí:**
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/paucolome)[![Donate](https://img.shields.io/badge/BitCoin-bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq-yellow)](https://link.trustwallet.com/send?coin=0&address=bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq)[![Donate](https://img.shields.io/badge/NANO-nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9-9cf)](https://link.trustwallet.com/send?coin=165&address=nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9)
+
 Un pequeño bot en node para que puedas mearte en los mineros. (_Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request_)
 
 ### Tiendas soportadas actualmente:
@@ -79,16 +83,4 @@ Una vez obtenida la ruta de Chromium (por defecto es /usr/bin/chromium-browser),
 }
 ```
 
-Ahora prueba a ejecutar el bot, este debería de funcionar correctamente.
-
-### Error Timeout al abrir las páginas
-
-Si os encontrais con este error es porque el dispositivo donde estés ejecutando el bot no es capaz de cargar todas las páginas que le has introducido en 30s (es el timeout por defecto). Para corregir este error debes subir el Timeout del bot desde el fichero data.json. También se puede deshabilitar si se pone a 0.
-
-```json
-{
-  "timeout": 30000 // milisegundos
-}
-```
-
-Con esto debería de estar corregido el error, pero os recomiendo reducir el número de páginas a consultar ya que ralentizará al bot en general puesto que estais sobrecargando la máquina que lo ejecuta.
+Ahora debería funcionar correctamente
