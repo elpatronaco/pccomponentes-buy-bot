@@ -1,7 +1,6 @@
 const scrape = require('scrape-it')
-const data = require('../../data.json')
 
-module.exports = async ({ link, maxPrice }) =>
+module.exports = async ({ link }) =>
   (
     await scrape(link, {
       price: {

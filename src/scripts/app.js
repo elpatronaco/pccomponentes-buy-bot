@@ -29,10 +29,10 @@ module.exports = class Bot {
         data.debug
           ? data.browserOptions.debug
           : {
-            executablePath:
-              process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-            ...data.browserOptions.headless
-          }
+              executablePath:
+                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+              ...data.browserOptions.headless
+            }
       )
 
       await this.stores.forEachAsync(async store => {
@@ -102,7 +102,8 @@ module.exports = class Bot {
           } else {
             log(
               chalk(
-                `Product ${resp.name && chalk.bold(resp.name)
+                `Product ${
+                  resp.name && chalk.bold(resp.name)
                 } is not yet in stock (${new Date().toUTCString()})`
               )
             )
