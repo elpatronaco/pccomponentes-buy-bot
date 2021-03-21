@@ -1,9 +1,14 @@
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-extra')
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+const Adblocker = require('puppeteer-extra-plugin-stealth')
 const chalk = require('chalk')
 const log = console.log
 const data = require('../data.json')
 const path = require('path')
 const { getDirectoryNames, sleep } = require('../utils')
+
+puppeteer.use(StealthPlugin())
+puppeteer.use(Adblocker())
 
 module.exports = class Bot {
   stores
@@ -17,22 +22,21 @@ module.exports = class Bot {
 
       log(`Starting bot`)
 
-      // this creates a new chrome instance
       const browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
           : {
-            executablePath:
-              process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-            ...data.browserOptions.headless
-          }
+              executablePath:
+                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
+              ...data.browserOptions.headless
+            }
       )
 
       await this.stores.forEachAsync(async store => {
         if (data[store]) {
           const loginPage = data.debug
             ? await browser.newPage()
-            : await this.createHeadlessPage(browser)
+            : await this.createHeadlessPage(browser, store)
 
           log(`Attempting login in ${store}`)
 
@@ -83,7 +87,7 @@ module.exports = class Bot {
           const resp = await scrape(item)
           if (resp.stock) {
             if (!item.maxPrice || (item.maxPrice && resp.price <= item.maxPrice)) {
-              customLog(resp, chalk.bgGreenBright('PRODUCT IN STOCK! Starting buy process'))
+              customLog(resp, chalk.greenBright('PRODUCT IN STOCK! Starting buy process'))
               canBuy = true
             } else {
               customLog(
@@ -103,7 +107,7 @@ module.exports = class Bot {
         } while (!canBuy)
 
         // buys item
-        const itemPage = await this.createHeadlessPage(browser)
+        const itemPage = await this.createHeadlessPage(browser, store)
         attempting = !(await buy(itemPage, item))
         await itemPage.close()
       } catch (err) {
@@ -151,10 +155,11 @@ module.exports = class Bot {
     }
   }
 
-  async createHeadlessPage(browser) {
+  async createHeadlessPage(browser, store) {
     const page = await browser.newPage()
 
-    page.setDefaultNavigationTimeout(data.timeout || 0)
+    // if (store === "amazon") page.setViewPort({ width: randomNumberRange(800, 1920), height: randomNumberRange(600, 1080) })
+
     const headlessUserAgent = await page.evaluate(() => navigator.userAgent)
     const chromeUserAgent = headlessUserAgent.replace('HeadlessChrome', 'Chrome')
     await page.setUserAgent(chromeUserAgent)

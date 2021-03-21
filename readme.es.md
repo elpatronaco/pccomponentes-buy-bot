@@ -11,7 +11,8 @@ Un pequeño bot en node para que puedas mearte en los mineros. (_Puede estar des
 - **PCComponentes**
 - **LDLC**
 - **Coolmod**
-- **Aussar** (puede funcionar mal)
+- **Aussar** (no acabada)
+- **Amazon** [necesitas tener 1-Click configurado]
 
 ### [in English](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.md)
 

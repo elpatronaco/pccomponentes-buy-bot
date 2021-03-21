@@ -12,6 +12,7 @@ A small buying bot made in node so you can get the 3080 you're dying for. (_This
 - **LDLC**
 - **Coolmod**
 - **Aussar** (being worked on)
+- **Amazon** [You need to have 1-Click set-up]
 
 ### [en Español](https://github.com/elpatronaco/pccomponentes-buy-bot/blob/master/readme.es.md)
 

@@ -23,7 +23,7 @@ module.exports = async ({ link }) =>
       },
       name: {
         selector: '.product-first-part',
-        convert: x => x.trim().replace(/(\r\n|\n|\r)/gm, "")
+        convert: x => x.trim().replace(/(\r\n|\n|\r)/gm, '')
       }
     })
   ).data
