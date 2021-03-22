@@ -1,18 +1,33 @@
+const { createCursor, getRandomPagePoint } = require('ghost-cursor')
+const { randomNumberRange } = require('ghost-cursor/lib/math')
+const { humanType } = require('../../utils')
+
 module.exports = async (page, { email, password }) => {
   await page.goto('https://www.aussar.es/iniciar-sesion', { waitUntil: 'networkidle2' })
 
-  // fills the form and logs in
-  const values = await Promise.all([
-    page.$("input[name='email']"),
-    page.$("input[name='password']"),
-    page.$('#submit-login')
-  ])
+  await page.waitForTimeout(randomNumberRange(1000, 3000))
 
-  await values[0].focus()
-  await page.keyboard.type(email.trim())
-  await values[1].focus()
-  await page.keyboard.type(password.trim())
-  await values[2].click()
+  const cursor = createCursor(page, await getRandomPagePoint(page))
+
+  await cursor.click("input[name='email']", {
+    waitForClick: randomNumberRange(1000, 3000),
+    moveDelay: randomNumberRange(1000, 3000),
+    paddingPercentage: 20
+  })
+  await humanType(page, email.trim())
+
+  await cursor.click("input[name='password']", {
+    waitForClick: randomNumberRange(1000, 3000),
+    moveDelay: randomNumberRange(1000, 3000),
+    paddingPercentage: 20
+  })
+  await humanType(page, password.trim())
+
+  await cursor.click('#submit-login', {
+    waitForClick: randomNumberRange(1000, 3000),
+    moveDelay: randomNumberRange(1000, 3000),
+    paddingPercentage: 20
+  })
 
   await page.waitForTimeout(10000)
 

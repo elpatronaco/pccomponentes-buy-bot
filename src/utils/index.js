@@ -1,7 +1,14 @@
 const fs = require('fs')
+const { randomNumberRange } = require('ghost-cursor/lib/math')
 const readline = require('readline')
 
 Array.prototype.forEachAsync = async function (fn) {
+  for (let t of this) {
+    await fn(t)
+  }
+}
+
+String.prototype.forEachAsync = async function (fn) {
   for (let t of this) {
     await fn(t)
   }
@@ -19,6 +26,11 @@ const rl = readline.createInterface({
 
 const question = str => new Promise(resolve => rl.question(str, resolve))
 
-const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+const humanType = async (page, str) => {
+  await [...str].forEachAsync(async letter => {
+    await page.keyboard.type(letter)
+    await page.waitForTimeout(randomNumberRange(30, 100))
+  })
+}
 
-module.exports = { getDirectoryNames, sleep, question, rl, randomIntFromInterval }
+module.exports = { getDirectoryNames, sleep, question, rl, humanType }
