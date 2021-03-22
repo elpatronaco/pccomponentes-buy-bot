@@ -20,7 +20,7 @@ Un pequeño bot en node para que puedas mearte en los mineros. (_Puede estar des
 
 ## Tutorial
 
-Para correr el bot necesitas la última versión de [Node](https://nodejs.org/es/download/) instalada y el [chromedriver](https://chromedriver.chromium.org/getting-started) para tu versión de chrome
+Necesitas la última versión de Node instalada. Puedes descargarla [aquí](https://nodejs.org/es/download/)
 
 Abre la consola y escribe
 

@@ -20,7 +20,7 @@ A small buying bot made in node so you can get the 3080 you're dying for. (_This
 
 ## How-to
 
-A few things are needed for the bot to work. [Node installed](https://nodejs.org/es/download/) and the [chromedriver](https://chromedriver.chromium.org/getting-started) for the exact release of your chrome installation.
+You need to have the latest version of Node installed. You can install it [here](https://nodejs.org/es/download/)
 
 Open the console and type
 
