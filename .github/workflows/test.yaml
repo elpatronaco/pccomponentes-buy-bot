@@ -24,7 +24,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: |
         echo "Installing Chromium"
-        apt install chromium-browser
+        apt update && apt install chromium-browser
         echo "Installing the JSON package"
         npm install -g json
         echo "Executing test.sh script"
