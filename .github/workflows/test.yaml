@@ -24,13 +24,17 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: |
         echo "Installing Chromium"
-        apt update && apt install chromium-browser
+        sudo apt update && apt install -y chromium-browser
+    - run: |
         echo "Installing the JSON package"
         npm install -g json
+    - run: |
         echo "Executing test.sh script"
         sh ./test.sh --pccomponentes_email ${{ secrets.PCCOMPONENTESEMAIL }} --pccomponentes_password ${{ secrets.PCCOMPONENTESPASSWORD }} --coolmod_email ${{ secrets.COOLMODEMAIL }} --coolmod_password ${{ secrets.COOLMODPASSWORD }} --ldlc_email ${{ secrets.LDLCEMAIL }} --ldlc_password ${{ secrets.LDLCPASSWORD }}
+    - run: |
         echo "Installing dependencies"
         npm install
+    - run: |
         echo "Executing test"
         npm start
         echo "Tests passed successfully"
