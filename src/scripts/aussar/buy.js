@@ -55,7 +55,7 @@ module.exports = async (page, { link }) => {
   const buyButton = await page.$('#payment-confirmation').$("button[type='submit']")
 
   if (buyButton) {
-    if (!data.debug) await buyButton.click()
+    if (!data.debug && !data.test) await buyButton.click()
   } else log(chalk.red("Couldn't find buy button"))
 
   await page.waitForTimeout(5000)

@@ -30,7 +30,7 @@ module.exports = async (page, { link }) => {
   const finishButton = await frame.waitForSelector('input#turbo-checkout-pyo-button', {
     visible: true
   })
-  if (!data.debug)
+  if (!data.debug && !data.test)
     await cursor.click(finishButton, {
       waitForClick: randomNumberRange(200, 1000),
       moveDelay: randomNumberRange(500, 1500),

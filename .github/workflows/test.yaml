@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 15.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: |
+        echo "Installing Chromium"
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser
+    - run: |
+        echo "Installing the JSON package"
+        npm install -g json
+    - run: |
+        echo "Executing test.sh script"
+        sh ./test.sh
+      env:
+        PCCOMPONENTES_EMAIL: ${{ secrets.PCCOMPONENTESEMAIL }}
+        PCCOMPONENTES_PASSWORD: ${{ secrets.PCCOMPONENTESPASSWORD }}
+        COOLMOD_EMAIL: ${{ secrets.COOLMODEMAIL }}
+        COOLMOD_PASSWORD: ${{ secrets.COOLMODPASSWORD }}
+        LDLC_EMAIL: ${{ secrets.LDLCEMAIL }}
+        LDLC_PASSWORD: ${{ secrets.LDLCPASSWORD }}
+    - run: |
+        echo "Installing dependencies"
+        npm install
+    - run: |
+        echo "Executing test"
+        npm start
+        echo "Tests passed successfully"
