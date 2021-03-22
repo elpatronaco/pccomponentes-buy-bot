@@ -13,7 +13,7 @@ module.exports = async (page, { email, password }) => {
   await values[1].click()
   await values[1].focus()
   await page.keyboard.type(password.trim())
-  await page.evaluate('document.querySelector("input[type=\'submit\']").click()')
+  await page.keyboard.press('Enter')
 
   await page.waitForTimeout(10000)
 
