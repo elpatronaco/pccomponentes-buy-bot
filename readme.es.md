@@ -6,6 +6,8 @@
 
 Un pequeño bot en node para que puedas mearte en los mineros. (_Puede estar desactualizado a causa de cambios en la página. Eres libre de hacer cualquier pull request_)
 
+:warning: **Disclaimer**: El uso de este bot está en un vacío legal (al menos en España). Asegúrate de mirar las leyes correspondientes en tu país. Tú eres responsable de tus acciones y nunca deberías culpar al creador ni a los contribuidores.
+
 ### Tiendas soportadas actualmente:
 
 - **PCComponentes**

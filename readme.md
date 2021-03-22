@@ -6,6 +6,8 @@
 
 A small buying bot made in node so you can get the 3080 you're dying for. (_This could be outdated because of changes on the website. Pull requests are welcome_)
 
+:warning: **Disclaimer**: Use of this bot is neither legal nor illegal (at least in Spain). Be sure to check the laws in your country first. You are responsible for you own actions and should never blame maintainers/contributors.
+
 ### Currently supported stores:
 
 - **PCComponentes**

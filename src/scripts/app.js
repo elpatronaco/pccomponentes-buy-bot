@@ -20,7 +20,17 @@ module.exports = class Bot {
 
       this.checkParams()
 
-      log(`Starting bot`)
+      log(
+        chalk(
+          `Starting bot with version ${chalk.cyan(
+            `v${require('../../package.json').version}`
+          )}\n${chalk.bgRed(
+            'DISCLAIMER'
+          )}: Use of this bot is neither legal nor illegal (at least in ${chalk(
+            chalk.red('Sp') + chalk.yellow('a') + chalk.red('in')
+          )}). You are responsible for you own actions and should never blame maintainers/contributors\n`
+        )
+      )
 
       const browser = await puppeteer.launch(
         data.debug
