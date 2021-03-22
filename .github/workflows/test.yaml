@@ -22,13 +22,13 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: |
-      npm ci
-      echo "Installing the JSON package"
-      npm install -g json
-      echo "Executing test.sh script"
-      ./test.sh --pccomponentes_email ${{ secrets.PCCOMPONENTESEMAIL }} --pccomponentes_password ${{ secrets.PCCOMPONENTESPASSWORD }} --coolmod_email ${{ secrets.COOLMODEMAIL }} --coolmod_password ${{ secrets.COOLMODPASSWORD }} --ldlc_email ${{ secrets.LDLCEMAIL }} --ldlc_password ${{ secrets.LDLCPASSWORD }}
-      echo "Installing dependencies"
-      npm install
-      echo "Executing test"
-      npm start
-      echo "Tests passed successfully"
+        npm ci
+        echo "Installing the JSON package"
+        npm install -g json
+        echo "Executing test.sh script"
+        ./test.sh --pccomponentes_email ${{ secrets.PCCOMPONENTESEMAIL }} --pccomponentes_password ${{ secrets.PCCOMPONENTESPASSWORD }} --coolmod_email ${{ secrets.COOLMODEMAIL }} --coolmod_password ${{ secrets.COOLMODPASSWORD }} --ldlc_email ${{ secrets.LDLCEMAIL }} --ldlc_password ${{ secrets.LDLCPASSWORD }}
+        echo "Installing dependencies"
+        npm install
+        echo "Executing test"
+        npm start
+        echo "Tests passed successfully"
