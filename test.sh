@@ -1,13 +1,13 @@
 #!/bin/bash
 
-pccomponentes_email=${pccomponentes_email:-}
-pccomponentes_password=${pccomponentes_password:-}
+pccomponentes_email=${pccomponentes_email:-amador@gmail.com}
+pccomponentes_password=${pccomponentes_password:-mariscosrecio}
 
-coolmod_email=${coolmod_email:-}
-coolmod_password=${coolmod_password:-}
+coolmod_email=${coolmod_email:-amador@gmail.com}
+coolmod_password=${coolmod_password:-mariscosrecio}
 
-ldlc_email=${ldlc_email:-}
-ldlc_password=${ldlc_password:-}
+ldlc_email=${ldlc_email:-amador@gmail.com}
+ldlc_password=${ldlc_password:-mariscosrecio}
 
 while [ $# -gt 0 ]; do
 
