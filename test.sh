@@ -16,5 +16,3 @@ json -I -f data.json -e "this.ldlc.password='$LDLC_PASSWORD'"
 json -I -f data.json -e "this.test=true"
 
 echo "Updated emails and passwords in data.json"
-
-less data.json
