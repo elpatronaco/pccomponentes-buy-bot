@@ -24,13 +24,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      env:
-        PCCOMPONENTES_EMAIL: ${{ secrets.PCCOMPONENTESEMAIL }}
-        PCCOMPONENTES_PASSWORD: ${{ secrets.PCCOMPONENTESPASSWORD }}
-        COOLMOD_EMAIL: ${{ secrets.COOLMODEMAIL }}
-        COOLMOD_PASSWORD: ${{ secrets.COOLMODPASSWORD }}
-        LDLC_EMAIL: ${{ secrets.LDLCEMAIL }}
-        LDLC_PASSWORD: ${{ secrets.LDLCPASSWORD }}
     - run: |
         echo "Installing Chromium"
         sudo apt-get update
@@ -41,6 +34,13 @@ jobs:
     - run: |
         echo "Executing test.sh script"
         sh ./test.sh
+      env:
+        PCCOMPONENTES_EMAIL: ${{ secrets.PCCOMPONENTESEMAIL }}
+        PCCOMPONENTES_PASSWORD: ${{ secrets.PCCOMPONENTESPASSWORD }}
+        COOLMOD_EMAIL: ${{ secrets.COOLMODEMAIL }}
+        COOLMOD_PASSWORD: ${{ secrets.COOLMODPASSWORD }}
+        LDLC_EMAIL: ${{ secrets.LDLCEMAIL }}
+        LDLC_PASSWORD: ${{ secrets.LDLCPASSWORD }}
     - run: |
         echo "Installing dependencies"
         npm install
