@@ -34,7 +34,8 @@ module.exports = async (page, { link }) => {
 
   log(chalk.yellow('Attempting buy of'))
 
-  if (!data.debug && !data.test) await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
+  if (!data.debug && !data.test)
+    await page.evaluate('document.querySelector("a[class=\'button-buy\']").click()')
 
   await page.waitForTimeout(6000)
 

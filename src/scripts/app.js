@@ -28,7 +28,7 @@ module.exports = class Bot {
             'DISCLAIMER'
           )}: Use of this bot is neither legal nor illegal (at least in ${chalk(
             chalk.red('Sp') + chalk.yellow('a') + chalk.red('in')
-          )}). You are responsible for you own actions and should never blame maintainers/contributors\n`
+          )}). You are responsible for your own actions and should never blame maintainers/contributors\n`
         )
       )
 

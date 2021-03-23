@@ -51,12 +51,9 @@ module.exports = async (page, { link }) => {
 
   while (page.url() === 'https://www.pccomponentes.com/cart/order' && attempting) {
     try {
-      if (data.debug)
-        await page.$eval('#pccom-conditions', el => el.click())
-      else if (data.test)
-        return page.url().includes('pccomponentes.com/cart/order/finished/ok')
-      else
-        await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
+      if (data.debug) await page.$eval('#pccom-conditions', el => el.click())
+      else if (data.test) return page.url().includes('pccomponentes.com/cart/order/finished/ok')
+      else await page.$eval('#GTM-carrito-finalizarCompra', el => el.click())
     } catch {
       attempting = false
     }

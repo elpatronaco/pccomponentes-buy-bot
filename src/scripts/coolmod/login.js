@@ -11,13 +11,7 @@ module.exports = async (page, { email, password }) => {
 
   const cursor = createCursor(page, await getRandomPagePoint(page))
 
-  const modalCloseBtn = await page.$('button.confirm')
-  if (modalCloseBtn)
-    await cursor.click(modalCloseBtn, {
-      waitForClick: randomNumberRange(1000, 3000),
-      moveDelay: randomNumberRange(1000, 3000),
-      paddingPercentage: 20
-    })
+  await page.evaluate("[...document.getElementsByClassName('confirm')].forEach(el => el.click())")
 
   await cursor.click("input[name='username']", {
     waitForClick: randomNumberRange(1000, 3000),
@@ -36,7 +30,7 @@ module.exports = async (page, { email, password }) => {
 
   await page.waitForTimeout(10000)
 
-  const userDropdown = await page.$('#usuario_login')
+  const emailInp = await page.$("input[name='username']")
 
-  return userDropdown && page.url().includes('https://www.coolmod.com/mi-cuenta')
+  return !emailInp && page.url().includes('https://www.coolmod.com/mi-cuenta')
 }
