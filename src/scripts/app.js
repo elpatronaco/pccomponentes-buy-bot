@@ -106,7 +106,8 @@ module.exports = class Bot {
         `[${chalk.cyanBright(store)}] ${resp.name && resp.name.substr(0, 35)}: ${content}`
       )
 
-      if (this.telegramController) this.telegramController.sendMessage(cleanChalkMsg(msg))
+      if (this.telegramController && !msg.includes('Product is not yet in stock'))
+        this.telegramController.sendMessage(cleanChalkMsg(msg))
       log(msg)
     }
 
