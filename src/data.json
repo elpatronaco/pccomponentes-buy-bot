@@ -33,6 +33,11 @@
   "debug": false,
   "test": false,
   "refreshRate": 3000,
+  "telegram": {
+    "enabled": true,
+    "bot_token": "jajajaja",
+    "chat_id": "jaja"
+  },
   "browserOptions": {
     "headless": {
       "headless": true,

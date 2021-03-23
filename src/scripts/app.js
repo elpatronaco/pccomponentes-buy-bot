@@ -5,13 +5,15 @@ const chalk = require('chalk')
 const log = console.log
 const data = require('../data.json')
 const path = require('path')
-const { getDirectoryNames, sleep } = require('../utils')
+const telegram = require('../controllers/telegram')
+const { getDirectoryNames, sleep, cleanChalkMsg } = require('../utils')
 
 puppeteer.use(StealthPlugin())
 puppeteer.use(Adblocker())
 
 module.exports = class Bot {
   stores
+  telegramController
 
   // main method
   async run() {
@@ -31,6 +33,17 @@ module.exports = class Bot {
           )}). You are responsible for your own actions and should never blame maintainers/contributors\n`
         )
       )
+
+      if (
+        data.telegram &&
+        data.telegram.enabled &&
+        data.telegram.bot_token &&
+        data.telegram.chat_id
+      ) {
+        log(chalk.cyan('Telegram notifications enabled \n'))
+
+        this.telegramController = await telegram(data.telegram.chat_id, data.telegram.bot_token)
+      }
 
       const browser = await puppeteer.launch(
         data.debug
@@ -88,8 +101,14 @@ module.exports = class Bot {
 
     let resp
 
-    const customLog = content =>
-      log(chalk(`[${chalk.cyanBright(store)}] ${resp.name && resp.name.substr(0, 35)}: ${content}`))
+    const customLog = content => {
+      const msg = chalk(
+        `[${chalk.cyanBright(store)}] ${resp.name && resp.name.substr(0, 35)}: ${content}`
+      )
+
+      if (this.telegramController) this.telegramController.sendMessage(cleanChalkMsg(msg))
+      log(msg)
+    }
 
     let attempting = true
     do {

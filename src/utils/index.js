@@ -33,4 +33,6 @@ const humanType = async (page, str) => {
   })
 }
 
-module.exports = { getDirectoryNames, sleep, question, rl, humanType }
+const cleanChalkMsg = msg => msg.replace(/\[[0-9]+m/g, '')
+
+module.exports = { getDirectoryNames, sleep, question, rl, humanType, cleanChalkMsg }
