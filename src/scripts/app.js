@@ -86,7 +86,9 @@ module.exports = class Bot {
     const scrape = require(path.join(__dirname, store, 'scrape'))
     const buy = require(path.join(__dirname, store, 'buy'))
 
-    const customLog = (resp, content) =>
+    let resp
+
+    const customLog = content =>
       log(chalk(`[${chalk.cyanBright(store)}] ${resp.name && resp.name.substr(0, 35)}: ${content}`))
 
     let attempting = true
@@ -94,38 +96,42 @@ module.exports = class Bot {
       try {
         let canBuy = false
         do {
-          const resp = await scrape(item)
+          resp = await scrape(item)
           if (resp.stock) {
             if (!item.maxPrice || (item.maxPrice && resp.price <= item.maxPrice)) {
-              customLog(resp, chalk.greenBright('PRODUCT IN STOCK! Starting buy process'))
+              customLog(
+                chalk.greenBright(
+                  `PRODUCT IN STOCK at ${chalk.bold(resp.price)}€! ${
+                    item.maxPrice && `Max price set is ${chalk.bold(item.maxPrice)}€. `
+                  } Starting buy process`
+                )
+              )
               canBuy = true
             } else {
               customLog(
-                resp,
                 chalk.red(
-                  `Price is above max. Max price set - ${item.maxPrice}€. Current price - ${resp.price}€`
+                  `Price is above max. Max price set - ${chalk.bold(
+                    item.maxPrice
+                  )}€. Current price - ${chalk.bold(resp.price)}€`
                 )
               )
             }
           } else {
-            customLog(
-              resp,
-              chalk.blueBright(`Product is not yet in stock (${new Date().toUTCString()}`)
-            )
+            customLog(chalk.blueBright(`Product is not yet in stock (${new Date().toUTCString()}`))
           }
           if (!canBuy) await sleep(data.refreshRate || 1000)
         } while (!canBuy)
 
         // buys item
         const itemPage = await this.createHeadlessPage(browser, store)
-        attempting = !(await buy(itemPage, item))
+        attempting = !(await buy(itemPage, item.link, customLog))
         await itemPage.close()
       } catch (err) {
         log(chalk.redBright(err))
       }
 
       if (!attempting) {
-        for (let i = 0; i < 20; i++) log(chalk.greenBright('COMPRADO'))
+        for (let i = 0; i < 10; i++) customLog(chalk.greenBright('COMPRADO'))
 
         if (data.onlyOneBuy) {
           log('You set onlyOneBuy to true, exiting the app...')

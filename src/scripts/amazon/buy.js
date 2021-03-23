@@ -6,7 +6,7 @@ const data = require('../../data.json')
 const { createCursor, getRandomPagePoint } = require('ghost-cursor')
 const { randomNumberRange } = require('ghost-cursor/lib/math')
 
-module.exports = async (page, { link }) => {
+module.exports = async (page, link, customLog) => {
   await page.goto(link, {
     waitUntil: 'domcontentloaded'
   })
@@ -22,7 +22,7 @@ module.exports = async (page, { link }) => {
     paddingPercentage: 30
   })
 
-  log(chalk.yellow('Attempting amazon fast buy'))
+  customLog(chalk.yellow('Attempting amazon fast buy'))
 
   const frameHandle = await page.waitForSelector('#turbo-checkout-iframe')
   const frame = await frameHandle.contentFrame()

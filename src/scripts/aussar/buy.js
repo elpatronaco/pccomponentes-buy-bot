@@ -1,9 +1,8 @@
 const chalk = require('chalk')
 
-const log = console.log
 const data = require('../../data.json')
 
-module.exports = async (page, { link }) => {
+module.exports = async (page, link, customLog) => {
   await page.goto(link, { waitUntil: 'domcontentloaded' })
 
   await (await page.$("button[data-button-action='add-to-cart']")).click()
@@ -20,25 +19,25 @@ module.exports = async (page, { link }) => {
 
   const confirmAddresses = await page.$("button[name='confirm-addresses']")
   if (confirmAddresses) await confirmAddresses.click()
-  else log(chalk.red("Didn't find confirm addresses button"))
+  else customLog(chalk.red("Didn't find confirm addresses button"))
 
   do await page.waitForTimeout(50)
   while (page.url() !== 'https://www.aussar.es/pedido')
 
   await page.waitForTimeout(5000)
 
-  log('clicking delivery')
+  customLog('clicking delivery')
 
   const deliveryMethod = await page.$('#delivery_option_32')
 
   if (deliveryMethod) await deliveryMethod.click()
-  else log(chalk.red("Didn't find GLS delivery button"))
+  else customLog(chalk.red("Didn't find GLS delivery button"))
 
   await (await page.waitForSelector("button[name='confirmDeliveryOption']")).click()
 
   await page.waitForTimeout(5000)
 
-  log(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
+  customLog(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
   const bankTransfer = await page.$('#payment-option-3')
   await bankTransfer.click()
 
@@ -50,13 +49,13 @@ module.exports = async (page, { link }) => {
     'document.getElementById("conditions_to_approve[terms-and-conditions]").click()'
   )
 
-  log(chalk.yellow('Attempting buy'))
+  customLog(chalk.yellow('Attempting buy'))
 
   const buyButton = await page.$('#payment-confirmation').$("button[type='submit']")
 
   if (buyButton) {
     if (!data.debug && !data.test) await buyButton.click()
-  } else log(chalk.red("Couldn't find buy button"))
+  } else customLog(chalk.red("Couldn't find buy button"))
 
   await page.waitForTimeout(5000)
 

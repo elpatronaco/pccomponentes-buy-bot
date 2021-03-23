@@ -3,7 +3,7 @@ const chalk = require('chalk')
 const log = console.log
 const data = require('../../data.json')
 
-module.exports = async (page, { link }) => {
+module.exports = async (page, link, customLog) => {
   await page.goto(link, {
     waitUntil: 'domcontentloaded'
   })
@@ -18,7 +18,7 @@ module.exports = async (page, { link }) => {
       waitUntil: 'networkidle2'
     })
   else {
-    log('Not found product id. Forcing click of all buy buttons')
+    customLog('Not found product id. Forcing click of all buy buttons')
     const buyButtons = await page.$$('.buy-button')
     let clickedButton = false
     buyButtons.forEach(async buyButton => {
@@ -34,7 +34,7 @@ module.exports = async (page, { link }) => {
 
   await page.goto('https://www.pccomponentes.com/cart/order', { waitUntil: 'networkidle2' })
 
-  log(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
+  customLog(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))
   const bankTransfer = await page.$("input[data-payment-name='Transferencia ordinaria']")
   await bankTransfer.click()
 
@@ -43,7 +43,7 @@ module.exports = async (page, { link }) => {
   )
     await page.waitForTimeout(200)
 
-  log(chalk.yellow('Attempting buy'))
+  customLog(chalk.yellow('Attempting buy'))
 
   let attempting = true
 
