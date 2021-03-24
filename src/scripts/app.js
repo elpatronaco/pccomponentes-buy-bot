@@ -1,3 +1,4 @@
+const telegram = require('../controllers/telegram')
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const Adblocker = require('puppeteer-extra-plugin-stealth')
@@ -5,17 +6,17 @@ const chalk = require('chalk')
 const log = console.log
 const data = require('../data.json')
 const path = require('path')
-const telegram = require('../controllers/telegram')
 const { getDirectoryNames, sleep, cleanChalkMsg } = require('../utils')
 
 puppeteer.use(StealthPlugin())
 puppeteer.use(Adblocker())
 
 module.exports = class Bot {
+  browser
   stores
   telegramController
+  runningItems = []
 
-  // main method
   async run() {
     try {
       this.stores = getDirectoryNames(__dirname)
@@ -24,7 +25,7 @@ module.exports = class Bot {
 
       log(
         chalk(
-          `Starting bot with version ${chalk.cyan(
+          `\nStarting bot with version ${chalk.cyan(
             `v${require('../../package.json').version}`
           )}\n${chalk.bgRed(
             'DISCLAIMER'
@@ -45,7 +46,7 @@ module.exports = class Bot {
         this.telegramController = await telegram(data.telegram.chat_id, data.telegram.bot_token)
       }
 
-      const browser = await puppeteer.launch(
+      this.browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
           : {
@@ -58,8 +59,8 @@ module.exports = class Bot {
       await this.stores.forEachAsync(async store => {
         if (data[store]) {
           const loginPage = data.debug
-            ? await browser.newPage()
-            : await this.createHeadlessPage(browser, store)
+            ? await this.browser.newPage()
+            : await this.createHeadlessPage()
 
           log(`Attempting login in ${store}`)
 
@@ -83,10 +84,10 @@ module.exports = class Bot {
         if (data[store]) {
           if (Array.isArray(data[store].items))
             await data[store].items.forEachAsync(async item => {
-              this.runItemInstance(browser, store, item)
+              this.runItemInstance(store, item)
               await sleep(50)
             })
-          else this.runItemInstance(browser, store, data[store].items)
+          else this.runItemInstance(store, data[store].items)
         }
       })
     } catch (err) {
@@ -95,9 +96,11 @@ module.exports = class Bot {
     }
   }
 
-  async runItemInstance(browser, store, item) {
+  async runItemInstance(store, item) {
     const scrape = require(path.join(__dirname, store, 'scrape'))
     const buy = require(path.join(__dirname, store, 'buy'))
+
+    this.runningItems.push({ store: store, ...item })
 
     let resp
 
@@ -143,7 +146,7 @@ module.exports = class Bot {
         } while (!canBuy)
 
         // buys item
-        const itemPage = await this.createHeadlessPage(browser, store)
+        const itemPage = await this.createHeadlessPage()
         attempting = !(await buy(itemPage, item.link, customLog))
         await itemPage.close()
       } catch (err) {
@@ -191,8 +194,8 @@ module.exports = class Bot {
     }
   }
 
-  async createHeadlessPage(browser, store) {
-    const page = await browser.newPage()
+  async createHeadlessPage() {
+    const page = await this.browser.newPage()
 
     // if (store === "amazon") page.setViewPort({ width: randomNumberRange(800, 1920), height: randomNumberRange(600, 1080) })
 

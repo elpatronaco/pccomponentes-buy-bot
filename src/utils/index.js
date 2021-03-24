@@ -1,6 +1,7 @@
 const fs = require('fs')
 const { randomNumberRange } = require('ghost-cursor/lib/math')
 const readline = require('readline')
+const app = require('../index')
 
 Array.prototype.forEachAsync = async function (fn) {
   for (let t of this) {
@@ -12,6 +13,10 @@ String.prototype.forEachAsync = async function (fn) {
   for (let t of this) {
     await fn(t)
   }
+}
+
+String.prototype.includesIgnoreCase = str => {
+  this.toLowerCase().includes(str.toLowerCase())
 }
 
 const getDirectoryNames = path =>
@@ -35,4 +40,26 @@ const humanType = async (page, str) => {
 
 const cleanChalkMsg = msg => msg.replace(/\[[0-9]+m/g, '')
 
-module.exports = { getDirectoryNames, sleep, question, rl, humanType, cleanChalkMsg }
+const getStoreName = link => {
+  let linkStore = undefined
+  stores.some(store => {
+    if (link.indexOf(store) >= 0) linkStore = store
+  })
+  return linkStore
+}
+
+const isNumeric = str => {
+  if (typeof str != 'string') return false
+  return !isNaN(str) && !isNaN(parseFloat(str))
+}
+
+module.exports = {
+  getDirectoryNames,
+  sleep,
+  question,
+  rl,
+  humanType,
+  cleanChalkMsg,
+  getStoreName,
+  isNumeric
+}
