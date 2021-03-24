@@ -35,11 +35,7 @@ module.exports = class Bot {
       const browser = await puppeteer.launch(
         data.debug
           ? data.browserOptions.debug
-          : {
-              executablePath:
-                process.platform === 'linux' ? '/usr/bin/chromium-browser' : undefined,
-              ...data.browserOptions.headless
-            }
+          : data.browserOptions.headless
       )
 
       await this.stores.forEachAsync(async store => {
