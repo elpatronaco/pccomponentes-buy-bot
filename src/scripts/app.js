@@ -33,9 +33,7 @@ module.exports = class Bot {
       )
 
       const browser = await puppeteer.launch(
-        data.debug
-          ? data.browserOptions.debug
-          : data.browserOptions.headless
+        data.debug ? data.browserOptions.debug : data.browserOptions.headless
       )
 
       await this.stores.forEachAsync(async store => {
@@ -62,16 +60,17 @@ module.exports = class Bot {
         }
       })
 
-      await this.stores.forEachAsync(async store => {
-        if (data[store]) {
-          if (Array.isArray(data[store].items))
-            await data[store].items.forEachAsync(async item => {
-              this.runItemInstance(browser, store, item)
-              await sleep(50)
-            })
-          else this.runItemInstance(browser, store, data[store].items)
-        }
-      })
+      if (!data.test)
+        await this.stores.forEachAsync(async store => {
+          if (data[store]) {
+            if (Array.isArray(data[store].items))
+              await data[store].items.forEachAsync(async item => {
+                this.runItemInstance(browser, store, item)
+                await sleep(50)
+              })
+            else this.runItemInstance(browser, store, data[store].items)
+          }
+        })
     } catch (err) {
       log(chalk.bgRedBright.white('! EXCEPTION NOT CAUGHT WHILE RUNNING BOT. MORE INFO BELOW !'))
       log(chalk.whiteBright(err))

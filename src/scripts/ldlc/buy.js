@@ -29,10 +29,8 @@ module.exports = async (page, link, customLog) => {
 
   await page.$("button[class='button color2 maxi']").then(async value => {
     if (value) {
-      if (data.debug) await value.focus()
-      else if (data.test)
-        return page.url().includes('https://secure2.ldlc.com/es-es/OrderConfirmation')
-      else await value.click()
+      await value.focus()
+      if (!data.debug) await value.click()
     } else customLog(chalk.redBright("Didn't find fast finish buy button"))
   })
 
