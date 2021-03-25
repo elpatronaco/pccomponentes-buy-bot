@@ -43,7 +43,11 @@ module.exports = class Bot {
       ) {
         log(chalk.cyan('Telegram notifications enabled \n'))
 
-        this.telegramController = await telegram(data.telegram.chat_id, data.telegram.bot_token)
+        this.telegramController = await telegram(
+          data.telegram.chat_id,
+          data.telegram.bot_token,
+          this
+        )
       }
 
       this.browser = await puppeteer.launch(
@@ -100,7 +104,7 @@ module.exports = class Bot {
     const scrape = require(path.join(__dirname, store, 'scrape'))
     const buy = require(path.join(__dirname, store, 'buy'))
 
-    this.runningItems.push({ store: store, ...item })
+    this.runningItems.push({ store: store, bought: false, ...item })
 
     let resp
 
@@ -155,6 +159,9 @@ module.exports = class Bot {
 
       if (!attempting) {
         for (let i = 0; i < 10; i++) customLog(chalk.greenBright('COMPRADO'))
+
+        let arrIndex = this.runningItems.find(it => it.link === item.link)
+        if (arrIndex) this.runningItems[arrIndex] = { ...this.runningItems[arrIndex], bought: true }
 
         if (data.onlyOneBuy) {
           log('You set onlyOneBuy to true, exiting the app...')

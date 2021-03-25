@@ -1,6 +1,5 @@
 const chalk = require('chalk')
 
-const log = console.log
 const data = require('../../data.json')
 
 const { createCursor, getRandomPagePoint } = require('ghost-cursor')

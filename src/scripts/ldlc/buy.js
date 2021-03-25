@@ -11,7 +11,7 @@ module.exports = async (page, link, customLog) => {
       if (value) {
         await value.focus()
         await value.click()
-      } else log(chalk.redBright("Didn't find fast order button"))
+      } else customLog(chalk.redBright("Didn't find fast order button"))
     })
 
   customLog(chalk.yellowBright('SELECTING TRANSFER AS PAYMENT'))

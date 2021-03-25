@@ -1,7 +1,6 @@
 const fs = require('fs')
 const { randomNumberRange } = require('ghost-cursor/lib/math')
 const readline = require('readline')
-const app = require('../index')
 
 Array.prototype.forEachAsync = async function (fn) {
   for (let t of this) {
@@ -40,7 +39,7 @@ const humanType = async (page, str) => {
 
 const cleanChalkMsg = msg => msg.replace(/\[[0-9]+m/g, '')
 
-const getStoreName = link => {
+const getStoreName = (link, stores) => {
   let linkStore = undefined
   stores.some(store => {
     if (link.indexOf(store) >= 0) linkStore = store
