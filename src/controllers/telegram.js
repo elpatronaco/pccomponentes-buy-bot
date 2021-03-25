@@ -21,7 +21,6 @@ module.exports = async function (chatId, botToken, app) {
   var answerCallbacks = {}
 
   bot.on('message', function (message) {
-    console.log(message.text)
     var callback = answerCallbacks[message.chat.id]
     if (callback) {
       delete answerCallbacks[message.chat.id]
@@ -67,9 +66,7 @@ module.exports = async function (chatId, botToken, app) {
         )
       })
     } else {
-      sendMessage(
-        ':bangbang: There are no running items. Issue the command <b>/addproduct</b> to add one'
-      )
+      sendMessage('‼️ There are no running items. Issue the command <b>/addproduct</b> to add one')
     }
   })
 

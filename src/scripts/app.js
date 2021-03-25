@@ -83,10 +83,10 @@ module.exports = class Bot {
           if (data[store]) {
             if (Array.isArray(data[store].items))
               await data[store].items.forEachAsync(async item => {
-                this.runItemInstance(browser, store, item)
+                this.runItemInstance(store, item)
                 await sleep(50)
               })
-            else this.runItemInstance(browser, store, data[store].items)
+            else this.runItemInstance(store, data[store].items)
           }
         })
     } catch (err) {
