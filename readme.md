@@ -1,5 +1,7 @@
 # Buy bot
 
+##‼️ Aviso: Está descontinuado. Aceptaré pull requests pero no arreglaré ni añadiré cosas.
+
 **If you support my work you can donate here:**
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/paucolome)[![Donate](https://img.shields.io/badge/BitCoin-bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq-yellow)](https://link.trustwallet.com/send?coin=0&address=bc1q7dwjlknyvwv4s4hr7gmzje96awv5s47hys38xq)[![Donate](https://img.shields.io/badge/NANO-nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9-9cf)](https://link.trustwallet.com/send?coin=165&address=nano_3t6mahppbnjg43b3ri6z4ywt5hhtdkf9cpgnny19uonptg8a5sabkfgj4fw9)
