@@ -1,6 +1,6 @@
 # Buy bot
 
-##‼️ Aviso: Está descontinuado. Aceptaré pull requests pero no arreglaré ni añadiré cosas.
+## ‼️ Aviso: Está descontinuado. Aceptaré pull requests pero no arreglaré ni añadiré cosas.
 
 **If you support my work you can donate here:**
 
